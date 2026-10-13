@@ -110,6 +110,7 @@ summary.x::-webkit-details-marker{display:none}
 .eye{background:none;border:1px solid var(--line);border-radius:8px;color:var(--blue);padding:4px 6px;cursor:pointer;display:flex}
 .eye[aria-pressed="true"] .slash{display:none}
 .bk{display:flex;align-items:center;gap:10px;flex-wrap:wrap}
+#app{width:100%;max-width:none;margin:0}
 .top{display:flex;align-items:center;justify-content:space-between;gap:10px}
 .login{display:flex;flex-direction:column;gap:12px;max-width:380px;width:100%;margin:24px auto 0}
 .login .btn{margin-top:4px}
@@ -155,7 +156,8 @@ summary.x::-webkit-details-marker{display:none}
         <label>Year<select id="bYear"></select></label>
       </div>
       <div class="row" style="margin-top:8px">
-        <label>Source<select id="bSource"><option value="School">School</option><option value="Academy">Academy</option><option value="Private">Private</option></select></label>
+        <label>Source<select id="bSource"><option value="School">School</option><option value="Academy">Academy</option><option value="Private">Private</option><option value="__new">New</option></select></label>
+        <label id="bNewWrap" hidden>Name<input id="bNew" placeholder="Fitness" autocomplete="off" maxlength="30"></label>
         <label>Amount (SAR)<input id="bAmount" type="number" inputmode="decimal" min="0" step="any" placeholder="0"></label>
       </div>
       <div class="row" style="margin-top:10px;align-items:center">
@@ -407,16 +409,21 @@ function renderBank(){
   drawAll();
   $("bTotLbl").textContent="Total for "+y;
   $("bTotal").textContent=fmt(rows.reduce((s,r)=>s+(+r.amount||0),0))+" SAR";
-  $("bSrc").innerHTML=["School","Academy","Private"].map(src=>`<div><span>${src}</span><b>${fmt(rows.filter(r=>r.source===src).reduce((a,r)=>a+(+r.amount||0),0))}</b></div>`).join("");
+  const base=["School","Academy","Private"], extra=[...new Set(rows.map(r=>r.source).filter(x=>x&&!base.includes(x)))];
+  $("bSrc").innerHTML=base.concat(extra).map(src=>`<div><span></span><b>${fmt(rows.filter(r=>r.source===src).reduce((a,r)=>a+(+r.amount||0),0))}</b></div>`).join("");
+  $("bSrc").querySelectorAll("span").forEach((el,i)=>el.textContent=base.concat(extra)[i]);
 }
 $("bView").onchange=renderBank;
+$("bSource").onchange=()=>{const n=$("bSource").value==="__new";$("bNewWrap").hidden=!n;if(n)setTimeout(()=>$("bNew").focus(),30);};
 $("bankForm").addEventListener("submit",async e=>{
   e.preventDefault();
-  const source=$("bSource").value, amount=parseFloat($("bAmount").value);
+  const isNew=$("bSource").value==="__new", source=isNew?$("bNew").value.trim().replace(/\s+/g," "):$("bSource").value, amount=parseFloat($("bAmount").value);
   const err=$("bErr"); err.hidden=true;
+  if(isNew&&!source){err.textContent="Write the name of the income.";err.hidden=false;return;}
   if(!(amount>0)){err.textContent="Enter the amount.";err.hidden=false;return;}
   const r={month:+$("bMonth").value,year:+$("bYear").value,source,amount,at:Date.now()};
   $("bAmount").value="";
+  if(isNew){$("bNew").value="";$("bSource").value="School";$("bNewWrap").hidden=true;}
   $("bView").value=r.year;
   if(db){try{await db.collection("bank").add(r);}catch(x){$("bAmount").value=amount;err.textContent="Not saved. Try again.";err.hidden=false;}}
   else{S.bank.push({...r,id:"l"+r.at});renderBank();}
