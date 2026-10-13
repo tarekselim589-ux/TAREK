@@ -1,0 +1,712 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width,initial-scale=1,viewport-fit=cover">
+<meta name="apple-mobile-web-app-capable" content="yes">
+<meta name="mobile-web-app-capable" content="yes">
+<meta name="apple-mobile-web-app-title" content="TAREK">
+<meta name="theme-color" content="#0F1C2C">
+<meta name="robots" content="noindex,nofollow">
+<link rel="icon" href="data:image/svg+xml,<svg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 100 100'><text y='.9em' font-size='90'>⚓</text></svg>">
+<link rel="apple-touch-icon" href="data:image/png;base64,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">
+<style>:root{box-sizing:border-box;padding-top:env(safe-area-inset-top,0px);padding-bottom:env(safe-area-inset-bottom,0px)}img{max-width:100%}[hidden]{display:none!important}</style>
+<title>TAREK</title>
+</head>
+<body>
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Barlow+Semi+Condensed:wght@600;700&family=IBM+Plex+Sans:wght@400;500;600&display=swap">
+<style>
+/* layout: one column, three tabs on top (BANK / Private Maria / Private 1), each tab a single working panel with its total at the bottom */
+:root{
+  --bg:#F2F5F9; --card:#FFFFFF; --ink:#0F1C2C; --muted:#5D6B7D; --line:#DBE3EC;
+  --blue:#1F5FBF; --tint:#E7EFFA; --gold:#9A6A12; --goldtint:#FBF2DF;
+  --warn:#C25E0C; --ok:#1E7A4C; --oktint:#E3F4EA; --bad:#B23A2E; --badtint:#FBE7E4;
+  --display:"Barlow Semi Condensed","Arial Narrow",Arial,sans-serif;
+  --body:"IBM Plex Sans",Arial,sans-serif;
+}
+@media (prefers-color-scheme:dark){:root:not([data-theme="light"]){
+  --bg:#0B1420; --card:#132235; --ink:#E5EDF7; --muted:#97A9BE; --line:#22364D;
+  --blue:#6FA3F2; --tint:#17304D; --gold:#E7B65A; --goldtint:#33280F;
+  --warn:#FFA352; --ok:#5ED19A; --oktint:#123526; --bad:#FF8C7E; --badtint:#3A1C19; color-scheme:dark}}
+:root[data-theme="dark"]{
+  --bg:#0B1420; --card:#132235; --ink:#E5EDF7; --muted:#97A9BE; --line:#22364D;
+  --blue:#6FA3F2; --tint:#17304D; --gold:#E7B65A; --goldtint:#33280F;
+  --warn:#FFA352; --ok:#5ED19A; --oktint:#123526; --bad:#FF8C7E; --badtint:#3A1C19; color-scheme:dark}
+*,*::before,*::after{box-sizing:border-box}
+body{background:var(--bg);color:var(--ink);font-family:var(--body);direction:ltr;margin:0;padding-inline:16px;padding-block:16px 40px;line-height:1.55}
+.wrap{max-width:640px;margin:0 auto;display:flex;flex-direction:column;gap:14px}
+h1{font-family:var(--display);font-size:32px;margin:0;line-height:1.1;letter-spacing:.06em}
+.tabs{position:sticky;top:env(safe-area-inset-top,0px);z-index:5;background:var(--bg);display:flex;gap:6px;padding-block:8px;overflow-x:auto;scrollbar-width:none}
+.tabs::-webkit-scrollbar{display:none}
+.tabs button{flex:0 0 auto;font:600 14px var(--body);border:1.5px solid var(--line);background:var(--card);color:var(--ink);border-radius:10px;padding:9px 14px;cursor:pointer;white-space:nowrap}
+.tabs .addtab{font-size:18px;line-height:1;padding:7px 14px;color:var(--blue);border-style:dashed;border-color:var(--blue)}
+.tabs button[aria-selected="true"]{background:var(--blue);border-color:var(--blue);color:var(--card)}
+button:focus-visible,select:focus-visible,input:focus-visible,summary:focus-visible{outline:2px solid var(--blue);outline-offset:2px}
+.panel{display:flex;flex-direction:column;gap:12px}
+.card{background:var(--card);border:1px solid var(--line);border-radius:14px;padding:14px}
+.row{display:flex;gap:8px;flex-wrap:wrap;align-items:end}
+.row > *{flex:1 1 120px;min-width:0}
+label{display:flex;flex-direction:column;gap:3px;font-size:12.5px;color:var(--muted);font-weight:500}
+select,input{font:15px var(--body);color:var(--ink);background:var(--bg);border:1px solid var(--line);border-radius:9px;padding:8px 10px;width:100%}
+.btn{font:600 15px var(--body);background:var(--blue);color:var(--card);border:0;border-radius:9px;padding:9px 16px;cursor:pointer}
+.err{color:var(--bad);font-size:13px;margin:0}
+.list{display:flex;flex-direction:column}
+.item{display:grid;grid-template-columns:minmax(0,1fr) auto auto;gap:10px;align-items:center;padding:10px 0;border-top:1px solid var(--line)}
+.item:first-child,.mh + .item{border-top:0}
+.mh{font-family:var(--display);font-size:21px;margin:16px 0 2px;color:var(--ink)}
+.mh:first-child{margin-top:0}
+.item .s{font-weight:600;overflow-wrap:anywhere}
+.amt{font-family:var(--display);font-weight:700;font-size:19px;font-variant-numeric:tabular-nums;color:var(--gold)}
+.x{background:none;border:1px solid var(--line);color:var(--muted);border-radius:8px;padding:3px 9px;font:13px var(--body);cursor:pointer}
+.x.arm{border-color:var(--bad);color:var(--bad);background:var(--badtint)}
+.empty{color:var(--muted);font-size:14px;text-align:center;padding:14px 0;margin:0}
+.total{display:flex;justify-content:space-between;align-items:center;background:var(--goldtint);border-radius:12px;padding:12px 16px;font-weight:600}
+.total b{font-family:var(--display);font-size:26px;color:var(--gold);font-variant-numeric:tabular-nums}
+.total.blue{background:var(--tint)}
+.total.blue b{color:var(--blue)}
+.day{display:grid;grid-template-columns:96px minmax(0,1fr) auto;gap:10px;align-items:center;padding:9px 0;border-top:1px solid var(--line)}
+.day:first-child{border-top:0}
+.dname{font-weight:600}
+.ddate{font-family:var(--display);font-size:19px;font-variant-numeric:tabular-nums;color:var(--blue)}
+.tog{display:flex;gap:6px}
+.tog button{font:600 13px var(--body);border:1.5px solid var(--line);background:var(--card);color:var(--muted);border-radius:8px;padding:5px 10px;cursor:pointer}
+.tog .p[aria-pressed="true"]{background:var(--oktint);border-color:var(--ok);color:var(--ok)}
+.tog .a[aria-pressed="true"]{background:var(--badtint);border-color:var(--bad);color:var(--bad)}
+.day.is-a .dname,.day.is-a .ddate{opacity:.6}
+.note{font-size:12.5px;color:var(--muted);margin:0}
+summary.note{cursor:pointer}
+.warn{font-size:13px;color:var(--bad);background:var(--badtint);border-radius:10px;padding:8px 12px;margin:0}
+.sub{display:flex;gap:14px;flex-wrap:wrap;font-size:13.5px;color:var(--muted)}
+.sub b{color:var(--ink)}
+@media (max-width:420px){.day{grid-template-columns:78px minmax(0,1fr) auto}}
+.days{margin:8px 0 0;font-size:14px;color:var(--muted)}
+.days b{color:var(--ink)}
+.ck{display:flex;flex-wrap:wrap;gap:6px;margin-top:4px}
+.ck label{flex-direction:row;align-items:center;gap:5px;border:1.5px solid var(--line);border-radius:8px;padding:5px 9px;color:var(--ink);font-size:13.5px;font-weight:600;cursor:pointer}
+.ck label:has(input:checked){border-color:var(--blue);background:var(--tint);color:var(--blue)}
+.ck input{width:auto;margin:0;accent-color:var(--blue)}
+.tag{display:inline-flex;align-items:center;gap:3px;margin-inline-start:6px;font-size:11px;font-weight:600;color:var(--gold);background:var(--goldtint);border-radius:999px;padding:0 4px 0 8px;vertical-align:middle}
+.rmx{background:none;border:0;color:var(--gold);font:600 13px var(--body);cursor:pointer;padding:0 4px}
+.rmx.arm{color:var(--bad)}
+.dname{line-height:1.3}
+.lock{display:flex;flex-direction:column;align-items:center;gap:10px;text-align:center;padding-block:26px;color:var(--ink)}
+.lock svg{color:var(--blue)}
+.lt{margin:0;font-weight:600;font-size:15px}
+.pin{width:150px;text-align:center;font:700 26px var(--display);letter-spacing:.5em;padding:8px 0 8px .5em}
+.mt{display:flex;justify-content:space-between;align-items:center;margin:4px 0 2px;padding:7px 12px;border-radius:9px;background:var(--goldtint);font-size:13.5px;font-weight:600}
+.mt b{font-family:var(--display);font-size:18px;color:var(--gold);font-variant-numeric:tabular-nums}
+.src{display:grid;grid-template-columns:repeat(3,minmax(0,1fr));gap:8px;padding:10px 14px}
+.src div{display:flex;flex-direction:column;gap:1px}
+.src span{font-size:12.5px;color:var(--muted);font-weight:500}
+.src b{font-family:var(--display);font-size:20px;color:var(--ink);font-variant-numeric:tabular-nums;overflow-wrap:anywhere}
+.tabs button.due::after{content:"";display:inline-block;width:8px;height:8px;border-radius:50%;background:var(--warn);margin-inline-start:7px;vertical-align:middle}
+.soon{color:var(--warn);font-weight:700}
+summary.x{display:inline-block;list-style:none}
+summary.x::-webkit-details-marker{display:none}
+.pvEd[open] summary.x{border-color:var(--blue);color:var(--blue)}
+.total.all{background:var(--card);border:1px solid var(--line)}
+.allv{display:flex;align-items:center;gap:10px}
+.total.all b{color:var(--ink)}
+.eye{background:none;border:1px solid var(--line);border-radius:8px;color:var(--blue);padding:4px 6px;cursor:pointer;display:flex}
+.eye[aria-pressed="true"] .slash{display:none}
+.bk{display:flex;align-items:center;gap:10px;flex-wrap:wrap}
+.top{display:flex;align-items:center;justify-content:space-between;gap:10px}
+.login{display:flex;flex-direction:column;gap:12px;max-width:380px;width:100%;margin:24px auto 0}
+.login .btn{margin-top:4px}
+.imp{display:inline-block;cursor:pointer}
+@media (prefers-reduced-motion:reduce){*{transition:none!important}}
+</style>
+
+<div class="wrap">
+  <div class="top"><h1>TAREK</h1><button class="x" type="button" id="outBtn" hidden>Sign out</button></div>
+  <p class="warn" id="fail" role="alert" hidden></p>
+
+  <form class="card login" id="login" novalidate hidden>
+    <p class="lt">Sign in</p>
+    <label>Email<input id="lgEmail" type="email" autocomplete="username" inputmode="email"></label>
+    <label>Password<input id="lgPass" type="password" autocomplete="current-password"></label>
+    <button class="btn" type="submit" id="lgBtn">Sign in</button>
+    <p class="err" id="lgErr" hidden></p>
+  </form>
+  <p class="note" id="booting" style="text-align:center">Loading…</p>
+
+  <div id="app" class="wrap" hidden>
+
+  <nav class="tabs" role="tablist" id="tabs">
+    <button role="tab" aria-selected="true" data-tab="bank">BANK</button>
+    <span id="pvTabs" style="display:contents"></span>
+    <button role="tab" aria-selected="false" data-tab="add" class="addtab" aria-label="Add private">+</button>
+  </nav>
+
+  <!-- BANK -->
+  <section class="panel" id="p-bank">
+    <form class="card lock" id="bankLock" novalidate>
+      <svg width="28" height="28" viewBox="0 0 24 24" aria-hidden="true"><rect x="4.5" y="10.5" width="15" height="10" rx="2.5" fill="none" stroke="currentColor" stroke-width="1.8"/><path d="M8 10.5V7.5a4 4 0 0 1 8 0v3" fill="none" stroke="currentColor" stroke-width="1.8"/></svg>
+      <p class="lt" id="lkTitle">Loading…</p>
+      <input id="pin1" class="pin" type="password" inputmode="numeric" pattern="[0-9]*" maxlength="4" autocomplete="off" aria-label="PIN" hidden>
+      <input id="pin2" class="pin" type="password" inputmode="numeric" pattern="[0-9]*" maxlength="4" autocomplete="off" aria-label="Confirm PIN" hidden>
+      <button class="btn" id="lkBtn" type="submit" hidden>Unlock</button>
+      <p class="err" id="lkErr" hidden></p>
+    </form>
+    <div id="bankBody" class="panel" hidden>
+    <form class="card" id="bankForm" novalidate>
+      <div class="row">
+        <label>Month<select id="bMonth"></select></label>
+        <label>Year<select id="bYear"></select></label>
+      </div>
+      <div class="row" style="margin-top:8px">
+        <label>Source<select id="bSource"><option value="School">School</option><option value="Academy">Academy</option><option value="Private">Private</option></select></label>
+        <label>Amount (SAR)<input id="bAmount" type="number" inputmode="decimal" min="0" step="any" placeholder="0"></label>
+      </div>
+      <div class="row" style="margin-top:10px;align-items:center">
+        <button class="btn" type="submit" style="flex:0 0 auto">Add</button>
+        <p class="err" id="bErr" hidden></p>
+      </div>
+    </form>
+
+    <div class="card">
+      <div class="row" style="margin-bottom:6px">
+        <label>Show year<select id="bView"></select></label>
+      </div>
+      <div class="list" id="bankList"></div>
+    </div>
+
+    <div class="card src" id="bSrc"></div>
+    <div class="total"><span id="bTotLbl">Total</span><b id="bTotal">0</b></div>
+    <div class="total all"><span>All years total</span><span class="allv"><b id="allTotal">••••••</b><button type="button" id="eye" class="eye" aria-pressed="false" aria-label="Show all years total"><svg width="22" height="22" viewBox="0 0 24 24" aria-hidden="true"><path d="M2 12s3.6-6.5 10-6.5S22 12 22 12s-3.6 6.5-10 6.5S2 12 2 12z" fill="none" stroke="currentColor" stroke-width="1.8"/><circle cx="12" cy="12" r="3" fill="none" stroke="currentColor" stroke-width="1.8"/><path class="slash" d="M4 4l16 16" stroke="currentColor" stroke-width="1.8"/></svg></button></span></div>
+    <div class="bk"><button class="x" type="button" id="bkBtn">Download backup</button><label class="x imp">Import backup<input type="file" id="impFile" accept=".json,application/json" hidden></label><span class="note" id="bkMsg" hidden></span></div>
+    <div class="card" id="impBox" hidden><p class="note" id="impInfo"></p><div class="row" style="margin-top:8px;align-items:center"><button class="btn" type="button" id="impGo" style="flex:0 0 auto">Confirm import</button><button class="x" type="button" id="impNo" style="flex:0 0 auto">Cancel</button></div></div>
+    <details class="pvEd" id="cpWrap"><summary class="x">Change PIN</summary>
+      <form class="row" id="cpForm" style="margin-top:8px" novalidate>
+        <label>Current PIN<input id="cpOld" type="password" inputmode="numeric" pattern="[0-9]*" maxlength="4" autocomplete="off"></label>
+        <label>New PIN<input id="cpNew" type="password" inputmode="numeric" pattern="[0-9]*" maxlength="4" autocomplete="off"></label>
+        <label>Again<input id="cpNew2" type="password" inputmode="numeric" pattern="[0-9]*" maxlength="4" autocomplete="off"></label>
+        <button class="btn" type="submit" style="flex:0 0 auto">Save</button>
+      </form>
+      <p class="err" id="cpErr" hidden></p><p class="note" id="cpOk" style="color:var(--ok)" hidden>PIN changed.</p>
+    </details>
+    </div>
+  </section>
+
+  <div id="pvPanels" style="display:contents"></div>
+
+  <!-- ADD PRIVATE -->
+  <section class="panel" id="p-add" hidden>
+    <form class="card" id="addForm" novalidate>
+      <p class="note" style="margin-bottom:8px">Add a new private</p>
+      <div class="row">
+        <label>Name<input id="aName" placeholder="Private 2" autocomplete="off" maxlength="40"></label>
+        <label>Sessions per package<input id="aN" type="number" inputmode="numeric" min="1" max="100" value="8"></label>
+      </div>
+      <div class="row" style="margin-top:10px;align-items:center">
+        <button class="btn" type="submit" style="flex:0 0 auto">Add private</button>
+        <p class="err" id="aErr" hidden></p>
+      </div>
+    </form>
+  </section>
+  </div>
+</div>
+
+<script type="module">
+import { initializeApp } from "https://www.gstatic.com/firebasejs/10.12.2/firebase-app.js";
+import { getAuth, onAuthStateChanged, signInWithEmailAndPassword, signOut } from "https://www.gstatic.com/firebasejs/10.12.2/firebase-auth.js";
+import { initializeFirestore, persistentLocalCache, collection as fCol, doc as fDoc, onSnapshot as fSnap, addDoc, setDoc, updateDoc, deleteDoc, getDocs, writeBatch } from "https://www.gstatic.com/firebasejs/10.12.2/firebase-firestore.js";
+const fbApp=initializeApp({
+  apiKey:"AIzaSyCLxD-fduSa6kgqnk8pJj8HwtzY3AYfhIg",
+  authDomain:"tarek-74842.firebaseapp.com",
+  projectId:"tarek-74842",
+  storageBucket:"tarek-74842.firebasestorage.app",
+  messagingSenderId:"179196785540",
+  appId:"1:179196785540:web:d4604f645dbbcc6e5f23d1"
+});
+const auth=getAuth(fbApp);
+let fs; try{ fs=initializeFirestore(fbApp,{localCache:persistentLocalCache()}); }catch(e){ fs=initializeFirestore(fbApp,{}); }
+const wrap=d=>({id:d.id,exists:d.exists(),data:()=>d.data()});
+const FS={
+  collection:p=>({
+    onSnapshot:(n,e)=>fSnap(fCol(fs,p),s=>n({docs:s.docs.map(wrap)}),e),
+    add:async data=>{const r=await addDoc(fCol(fs,p),data);return {id:r.id};},
+    get:async()=>{const s=await getDocs(fCol(fs,p));return {docs:s.docs.map(wrap)};}
+  }),
+  doc:p=>({
+    set:d=>setDoc(fDoc(fs,p),d), update:d=>updateDoc(fDoc(fs,p),d), delete:()=>deleteDoc(fDoc(fs,p)),
+    onSnapshot:(n,e)=>fSnap(fDoc(fs,p),s=>n(wrap(s)),e)
+  }),
+  batchSet:async items=>{
+    for(let i=0;i<items.length;i+=400){const b=writeBatch(fs);items.slice(i,i+400).forEach(([p,d])=>b.set(fDoc(fs,p),d));await b.commit();}
+  }
+};
+const MONTHS=["January","February","March","April","May","June","July","August","September","October","November","December"];
+const DAYS=["Sunday","Monday","Tuesday","Wednesday","Thursday","Friday","Saturday"];
+const now=new Date(), CY=now.getFullYear(), CM=now.getMonth();
+const years=[]; for(let y=2022;y<=2030;y++) years.push(y);
+const $=id=>document.getElementById(id);
+const fmt=n=>Number(n||0).toLocaleString("en-US",{maximumFractionDigits:2});
+const pad=n=>String(n).padStart(2,"0");
+
+function fill(sel,opts,val){sel.innerHTML=opts.map(o=>`<option value="${o.v}">${o.t}</option>`).join("");sel.value=String(val);}
+fill($("bMonth"),MONTHS.map((t,i)=>({v:i,t})),CM);
+["bYear","bView"].forEach(id=>fill($(id),years.map(y=>({v:y,t:y})),CY));
+
+let db=null;
+let failT;
+function fail(msg){const f=$("fail");f.textContent=msg||"Something didn't save. Check your internet and try again.";f.hidden=false;clearTimeout(failT);failT=setTimeout(()=>f.hidden=true,6000);}
+const S={bank:[], att:{}, pk:{}, sel:{}};
+let CUR="bank";
+
+/* tabs */
+function showTab(t){
+  if(t!=="bank"&&t!=="add"&&!CFG[t]) t="bank";
+  CUR=t;
+  if(t!=="bank") lockBank();
+  document.querySelectorAll(".tabs button").forEach(b=>b.setAttribute("aria-selected",b.dataset.tab===t));
+  document.querySelectorAll("section.panel").forEach(p=>p.hidden=p.id!=="p-"+t);
+  try{localStorage.setItem("tab",t)}catch(e){}
+}
+$("tabs").addEventListener("click",e=>{const b=e.target.closest("button[data-tab]");if(b)showTab(b.dataset.tab);});
+let SAVED="bank"; try{SAVED=localStorage.getItem("tab")||"bank";}catch(e){}
+showTab(SAVED==="add"?"add":"bank");
+
+/* BANK LOCK */
+var UNLOCKED=false, PIN=undefined, tries=0, waitUntil=0;
+function lockBank(){
+  SHOWALL=false; try{drawAll();}catch(e){}
+  try{$("cpWrap").open=false;["cpOld","cpNew","cpNew2"].forEach(id=>$(id).value="");$("cpErr").hidden=true;$("cpOk").hidden=true;}catch(e){}
+  UNLOCKED=false; $("bankBody").hidden=true; $("bankLock").hidden=false;
+  ["pin1","pin2"].forEach(id=>$(id).value=""); $("lkErr").hidden=true; drawLock();
+}
+function drawLock(){
+  const setMode=PIN===null, ready=PIN!==undefined;
+  $("lkTitle").textContent=!ready?"Loading…":setMode?"Choose a 4-digit PIN for BANK":"Enter your PIN";
+  $("pin1").hidden=!ready; $("pin2").hidden=!setMode; $("lkBtn").hidden=!ready;
+  $("pin1").setAttribute("aria-label",setMode?"New PIN":"PIN");
+  $("pin2").placeholder=setMode?"Again":"";
+  $("lkBtn").textContent=setMode?"Save PIN":"Unlock";
+  if(ready&&CUR==="bank"&&!UNLOCKED) setTimeout(()=>{try{$("pin1").focus()}catch(e){}},50);
+}
+async function hashPin(pin,salt){
+  const b=await crypto.subtle.digest("SHA-256",new TextEncoder().encode(salt+":"+pin));
+  return [...new Uint8Array(b)].map(x=>x.toString(16).padStart(2,"0")).join("");
+}
+function openBank(){UNLOCKED=true;tries=0;$("bankLock").hidden=true;$("bankBody").hidden=false;}
+$("bankLock").addEventListener("submit",async e=>{
+  e.preventDefault();
+  const er=$("lkErr"), p1=$("pin1").value, p2=$("pin2").value; er.hidden=true;
+  if(PIN===undefined) return;
+  if(!/^\d{4}$/.test(p1)){er.textContent="The PIN must be 4 digits.";er.hidden=false;return;}
+  if(PIN===null){
+    if(p1!==p2){er.textContent="The two PINs don't match. Type them again.";er.hidden=false;$("pin2").value="";return;}
+    const salt=Math.random().toString(36).slice(2)+Date.now().toString(36);
+    const doc={salt,h:await hashPin(p1,salt)};
+    try{await db.doc("settings/pin").set(doc);PIN=doc;openBank();}
+    catch(x){er.textContent="PIN not saved. Try again.";er.hidden=false;}
+    return;
+  }
+  if(Date.now()<waitUntil){er.textContent="Too many wrong tries. Wait "+Math.ceil((waitUntil-Date.now())/1000)+" seconds.";er.hidden=false;return;}
+  if(await hashPin(p1,PIN.salt)===PIN.h){openBank();}
+  else{tries++;$("pin1").value="";if(tries>=5){waitUntil=Date.now()+30000;tries=0;er.textContent="Too many wrong tries. Wait 30 seconds.";}else er.textContent="Wrong PIN.";er.hidden=false;}
+});
+$("pin1").addEventListener("input",()=>{if(PIN&&/^\d{4}$/.test($("pin1").value))$("bankLock").requestSubmit();});
+document.addEventListener("visibilitychange",()=>{if(document.hidden)lockBank();});
+window.addEventListener("pagehide",lockBank);
+
+$("cpForm").addEventListener("submit",async e=>{
+  e.preventDefault();
+  const er=$("cpErr"), ok=$("cpOk"), o=$("cpOld").value, n1=$("cpNew").value, n2=$("cpNew2").value; er.hidden=true; ok.hidden=true;
+  const bad=m=>{er.textContent=m;er.hidden=false;};
+  if(!PIN||!db) return bad("PIN can't be changed right now. Reload the page.");
+  if(!/^\d{4}$/.test(o)) return bad("Enter your current PIN.");
+  if(await hashPin(o,PIN.salt)!==PIN.h){$("cpOld").value="";return bad("Current PIN is wrong.");}
+  if(!/^\d{4}$/.test(n1)) return bad("The new PIN must be 4 digits.");
+  if(n1!==n2){$("cpNew2").value="";return bad("The two new PINs don't match.");}
+  const salt=Math.random().toString(36).slice(2)+Date.now().toString(36);
+  const doc={salt,h:await hashPin(n1,salt)};
+  try{await db.doc("settings/pin").set(doc);PIN=doc;["cpOld","cpNew","cpNew2"].forEach(id=>$(id).value="");ok.hidden=false;}
+  catch(x){bad("Not saved. Try again.");}
+});
+
+var SHOWALL=false;
+function drawAll(){
+  const t=S.bank.reduce((a,r)=>a+(+r.amount||0),0);
+  $("allTotal").textContent=SHOWALL?fmt(t)+" SAR":"••••••";
+  $("eye").setAttribute("aria-pressed",SHOWALL);
+  $("eye").setAttribute("aria-label",SHOWALL?"Hide all years total":"Show all years total");
+}
+$("eye").onclick=()=>{SHOWALL=!SHOWALL;drawAll();};
+
+$("bkBtn").onclick=async()=>{
+  const msg=$("bkMsg"); msg.hidden=true; msg.style.color="";
+  const strip=o=>{const c={...o};return c;};
+  const data={app:"TAREK",version:1,exported:new Date().toISOString(),
+    bank:S.bank.map(strip),
+    privates:PRIV.map(strip),
+    packages:Object.fromEntries(PRIV.map(p=>[p.id,(S.pk[p.id]||[]).map(strip)])),
+    attendance:Object.fromEntries(PRIV.map(p=>[p.id,S.att[p.id]||{}]))};
+  const d=new Date(), name=`TAREK-backup-${d.getFullYear()}-${pad(d.getMonth()+1)}-${pad(d.getDate())}.json`;
+  try{
+    const url=URL.createObjectURL(new Blob([JSON.stringify(data,null,2)],{type:"application/json"}));
+    const a=document.createElement("a"); a.href=url; a.download=name; document.body.appendChild(a); a.click(); a.remove();
+    setTimeout(()=>URL.revokeObjectURL(url),4000);
+    msg.textContent="Backup saved: "+name; msg.style.color="var(--ok)"; msg.hidden=false;
+  }catch(e){ msg.textContent="Backup didn't download. Try again."; msg.style.color="var(--bad)"; msg.hidden=false; }
+};
+
+/* IMPORT BACKUP */
+let IMP=null;
+$("impFile").addEventListener("change",async e=>{
+  const f=e.target.files[0]; e.target.value=""; const msg=$("bkMsg"); msg.hidden=true;
+  if(!f) return;
+  try{
+    const j=JSON.parse(await f.text());
+    if(j.app!=="TAREK"||!Array.isArray(j.bank)) throw 0;
+    IMP=j;
+    const np=(j.privates||[]).length, nb=j.bank.length;
+    const na=Object.values(j.attendance||{}).reduce((a,m)=>a+Object.keys(m).length,0);
+    $("impInfo").textContent=`This backup has ${nb} BANK entries, ${np} privates and ${na} attendance marks. Importing adds them here. Anything with the same entry is replaced by the backup copy.`;
+    $("impBox").hidden=false;
+  }catch(x){ msg.textContent="That file isn't a TAREK backup."; msg.style.color="var(--bad)"; msg.hidden=false; }
+});
+$("impNo").onclick=()=>{IMP=null;$("impBox").hidden=true;};
+$("impGo").onclick=async()=>{
+  if(!IMP) return; const j=IMP, msg=$("bkMsg"), go=$("impGo"); go.disabled=true; go.textContent="Importing…";
+  const items=[]; const clean=o=>{const c={...o};delete c.id;return c;};
+  j.bank.forEach(r=>items.push(["bank/"+r.id,clean(r)]));
+  (j.privates||[]).forEach(p=>{
+    items.push(["privates/"+p.id,clean(p)]);
+    ((j.packages||{})[p.id]||[]).forEach(k=>items.push([p.pcol+"/"+k.id,clean(k)]));
+    Object.entries((j.attendance||{})[p.id]||{}).forEach(([day,v])=>items.push([p.col+"/"+day,{s:v}]));
+  });
+  try{ await db.batchSet(items); msg.textContent=`Imported ${items.length} items.`; msg.style.color="var(--ok)"; $("impBox").hidden=true; IMP=null; }
+  catch(x){ msg.textContent="Import didn't finish. Try again."; msg.style.color="var(--bad)"; }
+  msg.hidden=false; go.disabled=false; go.textContent="Confirm import";
+};
+
+/* BANK */
+function renderBank(){
+  const y=+$("bView").value;
+  const rows=S.bank.filter(r=>r.year===y).sort((a,b)=>a.month-b.month||(a.at||0)-(b.at||0));
+  const list=$("bankList");
+  if(!rows.length){list.innerHTML=`<p class="empty">No income recorded for ${y}. Add the first amount above.</p>`;}
+  else{
+    let html="",last=-1;
+    rows.forEach((r,i)=>{
+      if(r.month!==last){html+=`<h3 class="mh">${MONTHS[r.month]}</h3>`;last=r.month;}
+      html+=`<div class="item"><div class="s"></div><span class="amt">${fmt(r.amount)}</span><button class="x" type="button" data-id="${r.id}">Delete</button></div>`;
+      if(i===rows.length-1||rows[i+1].month!==r.month){
+        const mt=rows.filter(x=>x.month===r.month).reduce((a,x)=>a+(+x.amount||0),0);
+        html+=`<div class="mt"><span>${MONTHS[r.month]} total</span><b>${fmt(mt)} SAR</b></div>`;
+      }
+    });
+    list.innerHTML=html;
+  }
+  list.querySelectorAll(".item").forEach((el,i)=>el.querySelector(".s").textContent=rows[i].source);
+  list.querySelectorAll(".x").forEach(b=>b.onclick=()=>{
+    if(!b.classList.contains("arm")){b.classList.add("arm");b.textContent="Sure?";setTimeout(()=>{b.classList.remove("arm");b.textContent="Delete"},3000);return;}
+    delBank(b.dataset.id);
+  });
+  drawAll();
+  $("bTotLbl").textContent="Total for "+y;
+  $("bTotal").textContent=fmt(rows.reduce((s,r)=>s+(+r.amount||0),0))+" SAR";
+  $("bSrc").innerHTML=["School","Academy","Private"].map(src=>`<div><span>${src}</span><b>${fmt(rows.filter(r=>r.source===src).reduce((a,r)=>a+(+r.amount||0),0))}</b></div>`).join("");
+}
+$("bView").onchange=renderBank;
+$("bankForm").addEventListener("submit",async e=>{
+  e.preventDefault();
+  const source=$("bSource").value, amount=parseFloat($("bAmount").value);
+  const err=$("bErr"); err.hidden=true;
+  if(!(amount>0)){err.textContent="Enter the amount.";err.hidden=false;return;}
+  const r={month:+$("bMonth").value,year:+$("bYear").value,source,amount,at:Date.now()};
+  $("bAmount").value="";
+  $("bView").value=r.year;
+  if(db){try{await db.collection("bank").add(r);}catch(x){$("bAmount").value=amount;err.textContent="Not saved. Try again.";err.hidden=false;}}
+  else{S.bank.push({...r,id:"l"+r.at});renderBank();}
+});
+async function delBank(id){
+  if(db){try{await db.doc("bank/"+id).delete();}catch(x){fail("Not deleted. Try again.");}}
+  else{S.bank=S.bank.filter(r=>r.id!==id);renderBank();}
+}
+
+/* ATTENDANCE — packages */
+const SHORT=["Sun","Mon","Tue","Wed","Thu","Fri","Sat"];
+const CFG={};
+const DEFAULTS=[
+  {id:"maria",name:"Private Maria",n:16,days:[1,2,4,6],col:"att_maria",pcol:"pkg_maria",order:1},
+  {id:"p1",name:"Private 1",n:8,days:[6,1],col:"att_p1",pcol:"pkg_p1",order:2}
+];
+const keyOf=dt=>`${dt.getFullYear()}-${pad(dt.getMonth()+1)}-${pad(dt.getDate())}`;
+const parse=k=>{const [y,m,d]=k.split("-").map(Number);return new Date(y,m-1,d);};
+const show=k=>{const d=parse(k);return `${pad(d.getDate())}/${pad(d.getMonth()+1)}/${d.getFullYear()}`;};
+const todayKey=keyOf(new Date(CY,CM,now.getDate()));
+const order=d=>[6,0,1,2,3,4,5].indexOf(d);
+const dayList=ds=>[...ds].sort((a,b)=>order(a)-order(b)).map(d=>DAYS[d]);
+const orList=ds=>{const l=dayList(ds);return l.length<2?l.join(""):l.slice(0,-1).join(", ")+" or "+l[l.length-1];};
+
+/* a package: {start, sched:[{from,days}], extra:[keys]} — older packages have no sched */
+function schedOf(k,p){return (p.sched&&p.sched.length)?[...p.sched].sort((a,b)=>a.from<b.from?-1:1):[{from:p.start,days:CFG[k].days}];}
+function daysOn(sched,key){let d=sched[0].days;for(const s of sched){if(s.from<=key)d=s.days;}return d;}
+function currentDays(k,p){return daysOn(schedOf(k,p),todayKey>p.start?todayKey:p.start);}
+function sessions(k,p){
+  const c=CFG[k], map=S.att[k]||{}, out=[], sched=schedOf(k,p), extra=new Set(p.extra||[]); let counted=0;
+  const dt=parse(p.start);
+  for(let i=0;i<500&&counted<c.n;i++){
+    const key=keyOf(dt), isExtra=extra.has(key);
+    if(isExtra||daysOn(sched,key).includes(dt.getDay())){out.push({key,wd:dt.getDay(),dt:new Date(dt),extra:isExtra&&!daysOn(sched,key).includes(dt.getDay())});if(map[key]!=="a")counted++;}
+    dt.setDate(dt.getDate()+1);
+  }
+  return out;
+}
+function nextStart(k,days){
+  const list=S.pk[k]; let d;
+  if(!list.length){d=new Date(CY,CM,now.getDate());}
+  else{const s=sessions(k,list[list.length-1]);d=parse(s[s.length-1].key);d.setDate(d.getDate()+1);}
+  for(let i=0;i<7&&!days.includes(d.getDay());i++)d.setDate(d.getDate()+1);
+  return keyOf(d);
+}
+function checks(cls,days){
+  return `<div class="ck ${cls}">`+[6,0,1,2,3,4,5].map(d=>`<label><input type="checkbox" value="${d}" ${days.includes(d)?"checked":""}>${SHORT[d]}</label>`).join("")+`</div>`;
+}
+const picked=el=>[...el.querySelectorAll("input:checked")].map(i=>+i.value);
+async function savePk(k,id,patch){
+  const c=CFG[k];
+  if(db){await db.doc(c.pcol+"/"+id).update(patch);}
+  else{Object.assign(S.pk[k].find(p=>p.id===id),patch);renderPk(k);renderAtt(k);}
+}
+function renderPk(k){
+  const c=CFG[k], list=S.pk[k], box=$(c.pk);
+  const lastDays=list.length?currentDays(k,list[list.length-1]):c.days;
+  const form=`<form class="newpk" style="margin-top:8px"><p class="note">Days</p>${checks("newDays",lastDays)}<div class="row" style="margin-top:8px"><label>First session date<input type="date" class="pkStart" value="${nextStart(k,lastDays)}"></label><button class="btn" type="submit" style="flex:0 0 auto">Start new package</button></div></form><p class="err pkErr" hidden></p>`;
+  const head=`<p class="note">Package of ${c.n} sessions</p>`;
+  if(!list.length){
+    box.innerHTML=`${head}<p class="empty" style="text-align:start;padding:6px 0 0">No package yet. Pick the days and the first session date, then start.</p>${form}`;
+  }else{
+    if(!list.find(p=>p.id===S.sel[k])) S.sel[k]=list[list.length-1].id;
+    const cur=list.find(p=>p.id===S.sel[k]), cd=currentDays(k,cur);
+    const opts=list.map((p,i)=>`<option value="${p.id}">Package ${i+1} · from ${show(p.start)}</option>`).join("");
+    box.innerHTML=`${head}<label style="margin-top:6px">Package<select class="pkSel">${opts}</select></label>
+      <p class="days">Days: <b>${dayList(cd).join(", ")}</b></p>
+      <details style="margin-top:6px"><summary class="note">Change days</summary>
+        <form class="editdays" style="margin-top:8px">${checks("edDays",cd)}<p class="note" style="margin-top:6px">Sessions already past stay as they are. The new days apply from ${show(todayKey>cur.start?todayKey:cur.start)}.</p><button class="btn" type="submit" style="margin-top:8px">Save days</button></form><p class="err dErr" hidden></p>
+      </details>
+      <details style="margin-top:6px"><summary class="note">Add extra session</summary>
+        <form class="row addex" style="margin-top:8px"><label>Date<input type="date" class="exDate"></label><button class="btn" type="submit" style="flex:0 0 auto">Add session</button></form><p class="err xErr" hidden></p>
+      </details>
+      <details style="margin-top:6px"><summary class="note">Edit / delete this package</summary>
+        <form class="row editpk" style="margin-top:8px"><label>First session date<input type="date" class="pkEdit" value="${cur.start}"></label><button class="btn" type="submit" style="flex:0 0 auto">Save date</button></form>
+        <button class="x delpk" type="button" style="margin-top:8px">Delete package</button><p class="err edErr" hidden></p>
+      </details>
+      <details style="margin-top:6px"><summary class="note">New package</summary>${form}</details>`;
+    const sel=box.querySelector(".pkSel"); sel.value=S.sel[k];
+    sel.onchange=()=>{S.sel[k]=sel.value;renderPk(k);renderAtt(k);};
+
+    const dErr=box.querySelector(".dErr");
+    box.querySelector(".editdays").addEventListener("submit",async e=>{
+      e.preventDefault(); dErr.hidden=true;
+      const ds=picked(box.querySelector(".edDays"));
+      if(!ds.length){dErr.textContent="Pick at least one day.";dErr.hidden=false;return;}
+      const from=todayKey>cur.start?todayKey:cur.start;
+      const sched=schedOf(k,cur).filter(s=>s.from<from).concat([{from,days:ds}]);
+      try{await savePk(k,cur.id,{sched});}catch(x){dErr.textContent="Not saved. Try again.";dErr.hidden=false;}
+    });
+
+    const xErr=box.querySelector(".xErr");
+    box.querySelector(".addex").addEventListener("submit",async e=>{
+      e.preventDefault(); xErr.hidden=true;
+      const v=box.querySelector(".exDate").value;
+      if(!v){xErr.textContent="Pick a date.";xErr.hidden=false;return;}
+      if(v<cur.start){xErr.textContent="That date is before this package starts.";xErr.hidden=false;return;}
+      if(sessions(k,cur).some(o=>o.key===v)){xErr.textContent="There's already a session on that date.";xErr.hidden=false;return;}
+      try{await savePk(k,cur.id,{extra:[...(cur.extra||[]),v]});}catch(x){xErr.textContent="Not saved. Try again.";xErr.hidden=false;}
+    });
+
+    const er2=box.querySelector(".edErr");
+    box.querySelector(".editpk").addEventListener("submit",async e=>{
+      e.preventDefault(); er2.hidden=true;
+      const v=box.querySelector(".pkEdit").value;
+      if(!v){er2.textContent="Pick a date.";er2.hidden=false;return;}
+      const sched=schedOf(k,cur); sched[0]={from:v,days:sched[0].days};
+      const fixed=sched.filter((s,i)=>i===0||s.from>v);
+      if(!daysOn(fixed,v).includes(parse(v).getDay())){er2.textContent="That date isn't a session day. Pick "+orList(daysOn(fixed,v))+".";er2.hidden=false;return;}
+      try{await savePk(k,cur.id,{start:v,sched:fixed});}catch(x){er2.textContent="Not saved. Try again.";er2.hidden=false;}
+    });
+    const del=box.querySelector(".delpk");
+    del.onclick=async()=>{
+      if(!del.classList.contains("arm")){del.classList.add("arm");del.textContent="Sure? Tap again to delete";setTimeout(()=>{del.classList.remove("arm");del.textContent="Delete package"},3000);return;}
+      const id=S.sel[k]; S.sel[k]=null;
+      if(db){try{await db.doc(c.pcol+"/"+id).delete();}catch(x){er2.textContent="Not deleted. Try again.";er2.hidden=false;}}
+      else{S.pk[k]=S.pk[k].filter(p=>p.id!==id);renderPk(k);renderAtt(k);}
+    };
+  }
+  const nf=box.querySelector(".newpk"), nd=nf.querySelector(".newDays");
+  nd.addEventListener("change",()=>{const ds=picked(nd);if(ds.length)nf.querySelector(".pkStart").value=nextStart(k,ds);});
+  nf.addEventListener("submit",async e=>{
+    e.preventDefault();
+    const v=box.querySelector(".pkStart").value, er=box.querySelector(".pkErr"), ds=picked(nd);
+    er.hidden=true;
+    if(!ds.length){er.textContent="Pick at least one day.";er.hidden=false;return;}
+    if(!v){er.textContent="Pick the first session date.";er.hidden=false;return;}
+    if(!ds.includes(parse(v).getDay())){er.textContent="That date isn't one of the days you picked. Pick "+orList(ds)+".";er.hidden=false;return;}
+    const p={start:v,sched:[{from:v,days:ds}],extra:[],at:Date.now()};
+    if(db){try{const ref=await db.collection(c.pcol).add(p);S.sel[k]=ref.id;}catch(x){er.textContent="Not saved. Try again.";er.hidden=false;}}
+    else{p.id="l"+p.at;S.pk[k].push(p);S.sel[k]=p.id;renderPk(k);renderAtt(k);}
+  });
+}
+function renderAtt(k){
+  const c=CFG[k], map=S.att[k]||{}, pk=(S.pk[k]||[]).find(p=>p.id===S.sel[k]);
+  if(!pk){$(c.box).innerHTML=`<p class="empty">Sessions will appear here with their dates once you start a package.</p>`;$(c.tot).textContent=`0 of ${c.n}`;$(c.sub).innerHTML="";return;}
+  const out=sessions(k,pk);
+  let p=0,a=0;
+  $(c.box).innerHTML=out.map(o=>{
+    const s=map[o.key]; if(s==="p")p++; if(s==="a")a++;
+    return `<div class="day ${s==="a"?"is-a":""}"><span class="dname">${DAYS[o.wd]}${o.extra?`<span class="tag">Extra <button type="button" class="rmx" data-k="${o.key}" aria-label="Remove extra session">×</button></span>`:""}</span><span class="ddate">${pad(o.dt.getDate())}/${pad(o.dt.getMonth()+1)}</span>
+      <div class="tog"><button class="p" type="button" aria-pressed="${s==="p"}" data-k="${o.key}" data-v="p">Present</button><button class="a" type="button" aria-pressed="${s==="a"}" data-k="${o.key}" data-v="a">Absent</button></div></div>`;
+  }).join("");
+  $(c.box).querySelectorAll(".tog button").forEach(b=>b.onclick=()=>mark(k,b.dataset.k,b.dataset.v));
+  $(c.box).querySelectorAll(".rmx").forEach(b=>b.onclick=async()=>{
+    if(!b.classList.contains("arm")){b.classList.add("arm");b.textContent="Remove?";setTimeout(()=>{b.classList.remove("arm");b.textContent="×"},3000);return;}
+    try{await savePk(k,pk.id,{extra:(pk.extra||[]).filter(x=>x!==b.dataset.k)});}catch(x){fail("Not removed. Try again.");}
+  });
+  $(c.tot).textContent=`${p} of ${c.n}`;
+  const done=p>=c.n, left=c.n-p;
+  updateDot(k);
+  $(c.sub).innerHTML=(done?`<span><b style="color:var(--ok)">Package complete</b></span>`:left<=2?`<span class="soon">${left} session${left===1?"":"s"} left</span>`:"")+`<span>Absences (made up): <b>${a}</b></span><span>Last session: <b>${show(out[out.length-1].key)}</b></span>`;
+}
+async function mark(k,key,v){
+  const c=CFG[k]; S.att[k]=S.att[k]||{}; const cur=S.att[k][key], next=cur===v?null:v;
+  if(next) S.att[k][key]=next; else delete S.att[k][key];
+  renderAtt(k);
+  if(db){try{ next?await db.doc(c.col+"/"+key).set({s:next}):await db.doc(c.col+"/"+key).delete(); }catch(x){ if(cur) S.att[k][key]=cur; else delete S.att[k][key]; renderAtt(k); fail("Attendance for "+show(key)+" didn't save. Check your internet and tap again."); }}
+}
+
+/* PRIVATES */
+function leftInLatest(k){
+  const list=S.pk[k]||[]; if(!list.length||!CFG[k]) return null;
+  const last=list[list.length-1], map=S.att[k]||{};
+  const p=sessions(k,last).filter(o=>map[o.key]==="p").length;
+  return CFG[k].n-p;
+}
+function updateDot(k){
+  const b=document.querySelector(`.tabs button[data-tab="${k}"]`); if(!b) return;
+  const l=leftInLatest(k), on=l!==null&&l>0&&l<=2;
+  b.classList.toggle("due",on);
+  b.title=on?`${l} session${l===1?"":"s"} left`:"";
+}
+const SUBS={};
+function buildPrivates(list){
+  list=[...list].sort((a,b)=>(a.order||0)-(b.order||0)||(a.at||0)-(b.at||0));
+  const ids=list.map(p=>p.id);
+  Object.keys(CFG).forEach(k=>{if(!ids.includes(k)){delete CFG[k];(SUBS[k]||[]).forEach(u=>u());delete SUBS[k];}});
+  $("pvTabs").innerHTML=""; $("pvPanels").innerHTML="";
+  list.forEach(p=>{
+    const k=p.id, pre="pv-"+k;
+    CFG[k]={name:p.name,days:p.days||[6,1],n:+p.n||8,col:p.col,pcol:p.pcol,pk:pre+"-pk",box:pre+"-days",tot:pre+"-tot",sub:pre+"-sub"};
+    S.pk[k]=S.pk[k]||[]; if(!(k in S.sel))S.sel[k]=null; S.att[k]=S.att[k]||{};
+    const tb=document.createElement("button"); tb.setAttribute("role","tab"); tb.dataset.tab=k; tb.textContent=p.name; $("pvTabs").appendChild(tb);
+    const sec=document.createElement("section"); sec.className="panel"; sec.id="p-"+k; sec.hidden=true;
+    sec.innerHTML=`<div class="card" id="${pre}-pk"></div><div class="card"><div id="${pre}-days"></div></div><div class="total blue"><span>Attended</span><b id="${pre}-tot">0</b></div><div class="sub" id="${pre}-sub"></div><details class="pvEd"><summary class="x">Edit private</summary><form class="row editpv" style="margin-top:8px"><label>Name<input class="pvName" maxlength="40" autocomplete="off"></label><label>Sessions per package<input class="pvN" type="number" inputmode="numeric" min="1" max="100"></label><button class="btn" type="submit" style="flex:0 0 auto">Save</button></form><p class="err pvEErr" hidden></p></details><div><button class="x delpv" type="button" style="margin-top:6px">Delete private</button><p class="err pvErr" hidden></p></div>`;
+    sec.querySelector(".pvName").value=p.name; sec.querySelector(".pvN").value=CFG[k].n;
+    sec.querySelector(".editpv").addEventListener("submit",async e=>{
+      e.preventDefault();
+      const er=sec.querySelector(".pvEErr"), name=sec.querySelector(".pvName").value.trim(), n=parseInt(sec.querySelector(".pvN").value,10); er.hidden=true;
+      if(!name){er.textContent="Enter a name.";er.hidden=false;return;}
+      if(!(n>=1&&n<=100)){er.textContent="Enter the number of sessions (1 to 100).";er.hidden=false;return;}
+      if(db){try{await db.doc("privates/"+k).update({name,n});}catch(x){er.textContent="Not saved. Try again.";er.hidden=false;}}
+      else{Object.assign(PRIV.find(x=>x.id===k),{name,n});buildPrivates(PRIV);}
+    });
+    $("pvPanels").appendChild(sec);
+    const del=sec.querySelector(".delpv");
+    del.onclick=async()=>{
+      if(!del.classList.contains("arm")){del.classList.add("arm");del.textContent="Sure? This deletes "+p.name+" and all its packages and attendance. Tap again";setTimeout(()=>{del.classList.remove("arm");del.textContent="Delete private"},4000);return;}
+      await deletePrivate(k);
+    };
+    renderPk(k); renderAtt(k);
+    if(db&&!SUBS[k]) subscribe(k);
+  });
+  showTab(CUR==="bank"||CUR==="add"?(CFG[SAVED]?SAVED:CUR):CUR);
+  SAVED=null;
+}
+function subscribe(k){
+  const c=CFG[k];
+  SUBS[k]=[
+    db.collection(c.col).onSnapshot(snap=>{
+      const m={}; snap.docs.forEach(d=>{const v=d.data(); if(v&&v.s) m[d.id]=v.s;}); S.att[k]=m; if(CFG[k]) renderAtt(k);
+    },()=>fail("Lost connection to your saved data. Reload the page.")),
+    db.collection(c.pcol).onSnapshot(snap=>{
+      S.pk[k]=snap.docs.map(d=>({id:d.id,...d.data()})).filter(p=>p.start).sort((a,b)=>a.start<b.start?-1:a.start>b.start?1:(a.at||0)-(b.at||0));
+      if(CFG[k]){renderPk(k); renderAtt(k);}
+    },()=>fail("Lost connection to your saved data. Reload the page."))
+  ];
+}
+async function deletePrivate(k){
+  const c=CFG[k], sec=$("p-"+k), er=sec&&sec.querySelector(".pvErr");
+  if(!db){PRIV=PRIV.filter(p=>p.id!==k);CUR="bank";buildPrivates(PRIV);return;}
+  try{
+    for(const col of [c.pcol,c.col]){const snap=await db.collection(col).get();for(const d of snap.docs) await db.doc(col+"/"+d.id).delete();}
+    CUR="bank";
+    await db.doc("privates/"+k).delete();
+  }catch(x){if(er){er.textContent="Not deleted. Try again.";er.hidden=false;}}
+}
+let PRIV=[];
+$("addForm").addEventListener("submit",async e=>{
+  e.preventDefault();
+  const name=$("aName").value.trim(), n=parseInt($("aN").value,10), err=$("aErr"); err.hidden=true;
+  if(!name){err.textContent="Enter a name.";err.hidden=false;return;}
+  if(!(n>=1&&n<=100)){err.textContent="Enter the number of sessions (1 to 100).";err.hidden=false;return;}
+  const id="pv"+Date.now().toString(36);
+  const p={name,n,days:[6,1],col:"att_"+id,pcol:"pkg_"+id,order:Date.now(),at:Date.now()};
+  $("aName").value="";
+  CUR=id;
+  if(db){try{await db.doc("privates/"+id).set(p);}catch(x){err.textContent="Not saved. Try again.";err.hidden=false;}}
+  else{PRIV.push({id,...p});buildPrivates(PRIV);}
+});
+
+renderBank();
+
+/* storage (Firebase) */
+async function startData(){
+  db.doc("settings/pin").onSnapshot(snap=>{
+    const d=snap.exists?snap.data():null;
+    PIN=(d&&d.h&&d.salt)?{h:d.h,salt:d.salt}:null;
+    if(!UNLOCKED) drawLock();
+  },()=>fail("Lost connection to your saved data. Reload the page."));
+  db.collection("bank").onSnapshot(snap=>{
+    S.bank=snap.docs.map(d=>({id:d.id,...d.data()})); renderBank();
+  },()=>fail("Lost connection to your saved data. Reload the page."));
+  db.collection("privates").onSnapshot(snap=>{
+    PRIV=snap.docs.map(d=>({id:d.id,...d.data()})).filter(p=>p.name&&p.col&&p.pcol);
+    buildPrivates(PRIV);
+  },()=>fail("Lost connection to your saved data. Reload the page."));
+}
+let STARTED=false;
+onAuthStateChanged(auth,user=>{
+  $("booting").hidden=true;
+  if(user){
+    $("login").hidden=true; $("app").hidden=false; $("outBtn").hidden=false;
+    if(!STARTED){STARTED=true; db=FS; startData();}
+  }else{
+    if(STARTED){location.reload();return;}
+    $("app").hidden=true; $("outBtn").hidden=true; $("login").hidden=false;
+  }
+});
+$("login").addEventListener("submit",async e=>{
+  e.preventDefault();
+  const er=$("lgErr"), btn=$("lgBtn"), em=$("lgEmail").value.trim(), pw=$("lgPass").value; er.hidden=true;
+  if(!em||!pw){er.textContent="Enter your email and password.";er.hidden=false;return;}
+  btn.disabled=true; btn.textContent="Signing in…";
+  try{ await signInWithEmailAndPassword(auth,em,pw); $("lgPass").value=""; }
+  catch(x){
+    const c=x&&x.code||"";
+    er.textContent=c.includes("too-many")?"Too many tries. Wait a few minutes and try again.":c.includes("network")?"No internet. Check your connection.":"Wrong email or password.";
+    er.hidden=false;
+  }
+  btn.disabled=false; btn.textContent="Sign in";
+});
+let outArm=false;
+$("outBtn").onclick=()=>{
+  const b=$("outBtn");
+  if(!outArm){outArm=true;b.textContent="Sure? Tap again";setTimeout(()=>{outArm=false;b.textContent="Sign out"},3000);return;}
+  signOut(auth);
+};
+</script>
+
+</body>
+</html>
