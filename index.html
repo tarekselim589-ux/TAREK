@@ -168,7 +168,7 @@ summary.x::-webkit-details-marker{display:none}
 
     <div class="card">
       <div class="row" style="margin-bottom:6px">
-        <label>Show year<select id="bView"></select></label>
+        <label>Show work year (Aug–Jul)<select id="bView"></select></label>
       </div>
       <div class="list" id="bankList"></div>
     </div>
@@ -248,7 +248,9 @@ const pad=n=>String(n).padStart(2,"0");
 
 function fill(sel,opts,val){sel.innerHTML=opts.map(o=>`<option value="${o.v}">${o.t}</option>`).join("");sel.value=String(val);}
 fill($("bMonth"),MONTHS.map((t,i)=>({v:i,t})),CM);
-["bYear","bView"].forEach(id=>fill($(id),years.map(y=>({v:y,t:y})),CY));
+fill($("bYear"),years.map(y=>({v:y,t:y})),CY);
+const wy=r=>r.month>=7?r.year:r.year-1, WYNOW=CM>=7?CY:CY-1, wyName=y=>y+"/"+(y+1);
+fill($("bView"),years.filter(y=>y<2030).map(y=>({v:y,t:wyName(y)})),WYNOW);
 
 let db=null;
 let failT;
@@ -386,16 +388,17 @@ $("impGo").onclick=async()=>{
 /* BANK */
 function renderBank(){
   const y=+$("bView").value;
-  const rows=S.bank.filter(r=>r.year===y).sort((a,b)=>a.month-b.month||(a.at||0)-(b.at||0));
+  const mk=r=>r.year*12+r.month;
+  const rows=S.bank.filter(r=>wy(r)===y).sort((a,b)=>mk(a)-mk(b)||(a.at||0)-(b.at||0));
   const list=$("bankList");
-  if(!rows.length){list.innerHTML=`<p class="empty">No income recorded for ${y}. Add the first amount above.</p>`;}
+  if(!rows.length){list.innerHTML=`<p class="empty">No income recorded for ${wyName(y)}. Add the first amount above.</p>`;}
   else{
     let html="",last=-1;
     rows.forEach((r,i)=>{
-      if(r.month!==last){html+=`<h3 class="mh">${MONTHS[r.month]}</h3>`;last=r.month;}
+      if(mk(r)!==last){html+=`<h3 class="mh">${MONTHS[r.month]} ${r.year}</h3>`;last=mk(r);}
       html+=`<div class="item"><div class="s"></div><span class="amt">${fmt(r.amount)}</span><button class="x" type="button" data-id="${r.id}">Delete</button></div>`;
-      if(i===rows.length-1||rows[i+1].month!==r.month){
-        const mt=rows.filter(x=>x.month===r.month).reduce((a,x)=>a+(+x.amount||0),0);
+      if(i===rows.length-1||mk(rows[i+1])!==mk(r)){
+        const mt=rows.filter(x=>mk(x)===mk(r)).reduce((a,x)=>a+(+x.amount||0),0);
         html+=`<div class="mt"><span>${MONTHS[r.month]} total</span><b>${fmt(mt)} SAR</b></div>`;
       }
     });
@@ -407,7 +410,7 @@ function renderBank(){
     delBank(b.dataset.id);
   });
   drawAll();
-  $("bTotLbl").textContent="Total for "+y;
+  $("bTotLbl").textContent="Total for "+wyName(y);
   $("bTotal").textContent=fmt(rows.reduce((s,r)=>s+(+r.amount||0),0))+" SAR";
   const base=["School","Academy","Private"], extra=[...new Set(rows.map(r=>r.source).filter(x=>x&&!base.includes(x)))];
   $("bSrc").innerHTML=base.concat(extra).map(src=>`<div><span></span><b>${fmt(rows.filter(r=>r.source===src).reduce((a,r)=>a+(+r.amount||0),0))}</b></div>`).join("");
@@ -424,7 +427,7 @@ $("bankForm").addEventListener("submit",async e=>{
   const r={month:+$("bMonth").value,year:+$("bYear").value,source,amount,at:Date.now()};
   $("bAmount").value="";
   if(isNew){$("bNew").value="";$("bSource").value="School";$("bNewWrap").hidden=true;}
-  $("bView").value=r.year;
+  $("bView").value=wy(r);
   if(db){try{await db.collection("bank").add(r);}catch(x){$("bAmount").value=amount;err.textContent="Not saved. Try again.";err.hidden=false;}}
   else{S.bank.push({...r,id:"l"+r.at});renderBank();}
 });
