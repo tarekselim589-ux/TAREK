@@ -115,6 +115,10 @@ summary.x::-webkit-details-marker{display:none}
 .login{display:flex;flex-direction:column;gap:12px;max-width:380px;width:100%;margin:24px auto 0}
 .login .btn{margin-top:4px}
 .imp{display:inline-block;cursor:pointer}
+.mh{display:flex;align-items:center;justify-content:space-between;gap:10px}
+.srcw{padding:10px 14px;display:flex;flex-direction:column;gap:6px}
+.srch{display:flex;align-items:center;justify-content:space-between;font-size:12.5px;color:var(--muted);font-weight:600}
+.srcw .src{padding:0}
 @media (prefers-reduced-motion:reduce){*{transition:none!important}}
 </style>
 
@@ -167,14 +171,23 @@ summary.x::-webkit-details-marker{display:none}
     </form>
 
     <div class="card">
-      <div class="row" style="margin-bottom:6px">
+      <div class="row" style="margin-bottom:6px;align-items:end">
         <label>Show work year (Aug–Jul)<select id="bView"></select></label>
+        <button type="button" id="eyeM" class="eye" style="flex:0 0 auto;padding:8px 9px" aria-pressed="false" aria-label="Show months"></button>
       </div>
       <div class="list" id="bankList"></div>
     </div>
 
-    <div class="card src" id="bSrc"></div>
-    <div class="total"><span id="bTotLbl">Total</span><b id="bTotal">0</b></div>
+    <div class="card srcw"><div class="srch"><span>Income by source</span><button type="button" id="eyeSrc" class="eye" aria-pressed="false" aria-label="Show income by source"></button></div><div class="src" id="bSrc"></div></div>
+    <div class="total"><span id="bTotLbl">Total</span><span class="allv"><b id="bTotal">••••••</b><button type="button" id="eyeT" class="eye" aria-pressed="false" aria-label="Show total"><svg width="22" height="22" viewBox="0 0 24 24" aria-hidden="true"><path d="M2 12s3.6-6.5 10-6.5S22 12 22 12s-3.6 6.5-10 6.5S2 12 2 12z" fill="none" stroke="currentColor" stroke-width="1.8"/><circle cx="12" cy="12" r="3" fill="none" stroke="currentColor" stroke-width="1.8"/><path class="slash" d="M4 4l16 16" stroke="currentColor" stroke-width="1.8"/></svg></button></span></div>
+    <div class="total all"><span id="stLbl">Starting balance</span><span class="allv"><b id="stVal">••••••</b><button type="button" id="eyeS" class="eye" aria-pressed="false" aria-label="Show starting balance"><svg width="22" height="22" viewBox="0 0 24 24" aria-hidden="true"><path d="M2 12s3.6-6.5 10-6.5S22 12 22 12s-3.6 6.5-10 6.5S2 12 2 12z" fill="none" stroke="currentColor" stroke-width="1.8"/><circle cx="12" cy="12" r="3" fill="none" stroke="currentColor" stroke-width="1.8"/><path class="slash" d="M4 4l16 16" stroke="currentColor" stroke-width="1.8"/></svg></button></span></div>
+    <div class="total all"><span id="sumLbl">Starting + Total</span><span class="allv"><b id="sumVal">••••••</b><button type="button" id="eyeSum" class="eye" aria-pressed="false" aria-label="Show starting plus total"></button></span></div>
+    <details class="pvEd" id="stWrap"><summary class="x">Edit starting balance</summary>
+      <form class="row" id="stForm" style="margin-top:8px" novalidate>
+        <label id="stInLbl">Starting balance (SAR)<input id="stIn" type="number" inputmode="decimal" min="0" step="any"></label>
+        <button class="btn" type="submit" style="flex:0 0 auto">Save</button>
+      </form><p class="err" id="stErr" hidden></p>
+    </details>
     <div class="total all"><span>All years total</span><span class="allv"><b id="allTotal">••••••</b><button type="button" id="eye" class="eye" aria-pressed="false" aria-label="Show all years total"><svg width="22" height="22" viewBox="0 0 24 24" aria-hidden="true"><path d="M2 12s3.6-6.5 10-6.5S22 12 22 12s-3.6 6.5-10 6.5S2 12 2 12z" fill="none" stroke="currentColor" stroke-width="1.8"/><circle cx="12" cy="12" r="3" fill="none" stroke="currentColor" stroke-width="1.8"/><path class="slash" d="M4 4l16 16" stroke="currentColor" stroke-width="1.8"/></svg></button></span></div>
     <div class="bk"><button class="x" type="button" id="bkBtn">Download backup</button><label class="x imp">Import backup<input type="file" id="impFile" accept=".json,application/json" hidden></label><span class="note" id="bkMsg" hidden></span></div>
     <div class="card" id="impBox" hidden><p class="note" id="impInfo"></p><div class="row" style="margin-top:8px;align-items:center"><button class="btn" type="button" id="impGo" style="flex:0 0 auto">Confirm import</button><button class="x" type="button" id="impNo" style="flex:0 0 auto">Cancel</button></div></div>
@@ -274,7 +287,7 @@ showTab(SAVED==="add"?"add":"bank");
 /* BANK LOCK */
 var UNLOCKED=false, PIN=undefined, tries=0, waitUntil=0;
 function lockBank(){
-  SHOWALL=false; try{drawAll();}catch(e){}
+  SHOWALL=false; SHOWT=false; SHOWS=false; SHOWSRC=false; SHOWM=false; SHOWSUM=false; try{drawAll();renderBank();$("stWrap").open=false;}catch(e){}
   try{$("cpWrap").open=false;["cpOld","cpNew","cpNew2"].forEach(id=>$(id).value="");$("cpErr").hidden=true;$("cpOk").hidden=true;}catch(e){}
   UNLOCKED=false; $("bankBody").hidden=true; $("bankLock").hidden=false;
   ["pin1","pin2"].forEach(id=>$(id).value=""); $("lkErr").hidden=true; drawLock();
@@ -329,7 +342,19 @@ $("cpForm").addEventListener("submit",async e=>{
   catch(x){bad("Not saved. Try again.");}
 });
 
-var SHOWALL=false;
+var SHOWALL=false, SHOWT=false, SHOWS=false, SHOWSRC=false, STARTS={}; let SHOWM=false, SHOWSUM=false, YTOTAL=0;
+function eyeSet(id,on,what){ $(id).setAttribute("aria-pressed",on); $(id).setAttribute("aria-label",(on?"Hide ":"Show ")+what); }
+function drawStart(){
+  const y=+$("bView").value, v=STARTS[y];
+  $("stLbl").textContent="Starting balance "+wyName(y);
+  $("stVal").textContent=!SHOWS?"••••••":(v==null?"Not set":fmt(v)+" SAR");
+  $("sumLbl").textContent="Starting + Total "+wyName(y);
+  $("sumVal").textContent=SHOWSUM?fmt((v||0)+YTOTAL)+" SAR":"••••••";
+  eyeSet("eyeSum",SHOWSUM,"starting plus total");
+  eyeSet("eyeS",SHOWS,"starting balance");
+  $("stInLbl").firstChild.textContent="Starting balance "+wyName(y)+" (SAR)";
+  if(document.activeElement!==$("stIn")) $("stIn").value=v==null?"":v;
+}
 function drawAll(){
   const t=S.bank.reduce((a,r)=>a+(+r.amount||0),0);
   $("allTotal").textContent=SHOWALL?fmt(t)+" SAR":"••••••";
@@ -337,6 +362,20 @@ function drawAll(){
   $("eye").setAttribute("aria-label",SHOWALL?"Hide all years total":"Show all years total");
 }
 $("eye").onclick=()=>{SHOWALL=!SHOWALL;drawAll();};
+$("eyeT").onclick=()=>{SHOWT=!SHOWT;renderBank();};
+const EYESVG=$("eye").innerHTML; $("eyeSrc").innerHTML=EYESVG;
+$("eyeSrc").onclick=()=>{SHOWSRC=!SHOWSRC;renderBank();};
+$("eyeSum").innerHTML=EYESVG; $("eyeSum").onclick=()=>{SHOWSUM=!SHOWSUM;drawStart();};
+$("eyeM").innerHTML=EYESVG; $("eyeM").onclick=()=>{SHOWM=!SHOWM;renderBank();};
+$("eyeS").onclick=()=>{SHOWS=!SHOWS;drawStart();};
+$("stForm").addEventListener("submit",async e=>{
+  e.preventDefault(); const er=$("stErr"); er.hidden=true;
+  const raw=$("stIn").value.trim(), y=+$("bView").value;
+  if(raw!==""&&!(parseFloat(raw)>=0)){er.textContent="Enter a number.";er.hidden=false;return;}
+  const next={...STARTS}; if(raw==="") delete next[y]; else next[y]=parseFloat(raw);
+  try{ if(db) await db.doc("settings/start").set({by:next}); STARTS=next; $("stWrap").open=false; SHOWS=true; drawStart(); }
+  catch(x){er.textContent="Not saved. Try again.";er.hidden=false;}
+});
 
 $("bkBtn").onclick=async()=>{
   const msg=$("bkMsg"); msg.hidden=true; msg.style.color="";
@@ -395,11 +434,12 @@ function renderBank(){
   else{
     let html="",last=-1;
     rows.forEach((r,i)=>{
-      if(mk(r)!==last){html+=`<h3 class="mh">${MONTHS[r.month]} ${r.year}</h3>`;last=mk(r);}
-      html+=`<div class="item"><div class="s"></div><span class="amt">${fmt(r.amount)}</span><button class="x" type="button" data-id="${r.id}">Delete</button></div>`;
+      const op=SHOWM;
+      if(mk(r)!==last){html+=`<h3 class="mh"><span>${MONTHS[r.month]} ${r.year}</span></h3>`;last=mk(r);}
+      html+=`<div class="item"><div class="s"></div><span class="amt">${op?fmt(r.amount):"••••"}</span><button class="x" type="button" data-id="${r.id}">Delete</button></div>`;
       if(i===rows.length-1||mk(rows[i+1])!==mk(r)){
         const mt=rows.filter(x=>mk(x)===mk(r)).reduce((a,x)=>a+(+x.amount||0),0);
-        html+=`<div class="mt"><span>${MONTHS[r.month]} total</span><b>${fmt(mt)} SAR</b></div>`;
+        html+=`<div class="mt"><span>${MONTHS[r.month]} total</span><b>${op?fmt(mt)+" SAR":"••••••"}</b></div>`;
       }
     });
     list.innerHTML=html;
@@ -411,9 +451,9 @@ function renderBank(){
   });
   drawAll();
   $("bTotLbl").textContent="Total for "+wyName(y);
-  $("bTotal").textContent=fmt(rows.reduce((s,r)=>s+(+r.amount||0),0))+" SAR";
+  YTOTAL=rows.reduce((s,r)=>s+(+r.amount||0),0); $("bTotal").textContent=SHOWT?fmt(rows.reduce((s,r)=>s+(+r.amount||0),0))+" SAR":"••••••"; eyeSet("eyeT",SHOWT,"total"); drawStart();
   const base=["School","Academy","Private"], extra=[...new Set(rows.map(r=>r.source).filter(x=>x&&!base.includes(x)))];
-  $("bSrc").innerHTML=base.concat(extra).map(src=>`<div><span></span><b>${fmt(rows.filter(r=>r.source===src).reduce((a,r)=>a+(+r.amount||0),0))}</b></div>`).join("");
+  $("bSrc").innerHTML=base.concat(extra).map(src=>`<div><span></span><b>${SHOWSRC?fmt(rows.filter(r=>r.source===src).reduce((a,r)=>a+(+r.amount||0),0)):"••••"}</b></div>`).join(""); eyeSet("eyeSrc",SHOWSRC,"income by source"); eyeSet("eyeM",SHOWM,"months");
   $("bSrc").querySelectorAll("span").forEach((el,i)=>el.textContent=base.concat(extra)[i]);
 }
 $("bView").onchange=renderBank;
@@ -673,6 +713,7 @@ renderBank();
 
 /* storage (Firebase) */
 async function startData(){
+  db.doc("settings/start").onSnapshot(snap=>{ const d=snap.exists?snap.data():null; STARTS=(d&&d.by)||{}; try{drawStart();}catch(e){} },()=>{});
   db.doc("settings/pin").onSnapshot(snap=>{
     const d=snap.exists?snap.data():null;
     PIN=(d&&d.h&&d.salt)?{h:d.h,salt:d.salt}:null;
