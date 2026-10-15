@@ -162,7 +162,7 @@ summary.x::-webkit-details-marker{display:none}
       <div class="row" style="margin-top:8px">
         <label>Source<select id="bSource"><option value="School">School</option><option value="Academy">Academy</option><option value="Private">Private</option><option value="__new">New</option></select></label>
         <label id="bNewWrap" hidden>Name<input id="bNew" placeholder="Fitness" autocomplete="off" maxlength="30"></label>
-        <label>Amount (SAR)<input id="bAmount" type="number" inputmode="decimal" min="0" step="any" placeholder="0"></label>
+        <label>Amount<input id="bAmount" type="number" inputmode="decimal" min="0" step="any" placeholder="0"></label>
       </div>
       <div class="row" style="margin-top:10px;align-items:center">
         <button class="btn" type="submit" style="flex:0 0 auto">Add</button>
@@ -184,7 +184,7 @@ summary.x::-webkit-details-marker{display:none}
     <div class="total all"><span id="sumLbl">Starting + Total</span><span class="allv"><b id="sumVal">••••••</b><button type="button" id="eyeSum" class="eye" aria-pressed="false" aria-label="Show starting plus total"></button></span></div>
     <details class="pvEd" id="stWrap"><summary class="x">Edit starting balance</summary>
       <form class="row" id="stForm" style="margin-top:8px" novalidate>
-        <label id="stInLbl">Starting balance (SAR)<input id="stIn" type="number" inputmode="decimal" min="0" step="any"></label>
+        <label id="stInLbl">Starting balance<input id="stIn" type="number" inputmode="decimal" min="0" step="any"></label>
         <button class="btn" type="submit" style="flex:0 0 auto">Save</button>
       </form><p class="err" id="stErr" hidden></p>
     </details>
@@ -347,17 +347,17 @@ function eyeSet(id,on,what){ $(id).setAttribute("aria-pressed",on); $(id).setAtt
 function drawStart(){
   const y=+$("bView").value, v=STARTS[y];
   $("stLbl").textContent="Starting balance "+wyName(y);
-  $("stVal").textContent=!SHOWS?"••••••":(v==null?"Not set":fmt(v)+" SAR");
+  $("stVal").textContent=!SHOWS?"••••••":(v==null?"Not set":fmt(v));
   $("sumLbl").textContent="Starting + Total "+wyName(y);
-  $("sumVal").textContent=SHOWSUM?fmt((v||0)+YTOTAL)+" SAR":"••••••";
+  $("sumVal").textContent=SHOWSUM?fmt((v||0)+YTOTAL):"••••••";
   eyeSet("eyeSum",SHOWSUM,"starting plus total");
   eyeSet("eyeS",SHOWS,"starting balance");
-  $("stInLbl").firstChild.textContent="Starting balance "+wyName(y)+" (SAR)";
+  $("stInLbl").firstChild.textContent="Starting balance "+wyName(y)+"";
   if(document.activeElement!==$("stIn")) $("stIn").value=v==null?"":v;
 }
 function drawAll(){
   const t=S.bank.reduce((a,r)=>a+(+r.amount||0),0);
-  $("allTotal").textContent=SHOWALL?fmt(t)+" SAR":"••••••";
+  $("allTotal").textContent=SHOWALL?fmt(t):"••••••";
   $("eye").setAttribute("aria-pressed",SHOWALL);
   $("eye").setAttribute("aria-label",SHOWALL?"Hide all years total":"Show all years total");
 }
@@ -439,7 +439,7 @@ function renderBank(){
       html+=`<div class="item"><div class="s"></div><span class="amt">${op?fmt(r.amount):"••••"}</span><button class="x" type="button" data-id="${r.id}">Delete</button></div>`;
       if(i===rows.length-1||mk(rows[i+1])!==mk(r)){
         const mt=rows.filter(x=>mk(x)===mk(r)).reduce((a,x)=>a+(+x.amount||0),0);
-        html+=`<div class="mt"><span>${MONTHS[r.month]} total</span><b>${op?fmt(mt)+" SAR":"••••••"}</b></div>`;
+        html+=`<div class="mt"><span>${MONTHS[r.month]} total</span><b>${op?fmt(mt):"••••••"}</b></div>`;
       }
     });
     list.innerHTML=html;
@@ -451,7 +451,7 @@ function renderBank(){
   });
   drawAll();
   $("bTotLbl").textContent="Total for "+wyName(y);
-  YTOTAL=rows.reduce((s,r)=>s+(+r.amount||0),0); $("bTotal").textContent=SHOWT?fmt(rows.reduce((s,r)=>s+(+r.amount||0),0))+" SAR":"••••••"; eyeSet("eyeT",SHOWT,"total"); drawStart();
+  YTOTAL=rows.reduce((s,r)=>s+(+r.amount||0),0); $("bTotal").textContent=SHOWT?fmt(rows.reduce((s,r)=>s+(+r.amount||0),0)):"••••••"; eyeSet("eyeT",SHOWT,"total"); drawStart();
   const base=["School","Academy","Private"], extra=[...new Set(rows.map(r=>r.source).filter(x=>x&&!base.includes(x)))];
   $("bSrc").innerHTML=base.concat(extra).map(src=>`<div><span></span><b>${SHOWSRC?fmt(rows.filter(r=>r.source===src).reduce((a,r)=>a+(+r.amount||0),0)):"••••"}</b></div>`).join(""); eyeSet("eyeSrc",SHOWSRC,"income by source"); eyeSet("eyeM",SHOWM,"months");
   $("bSrc").querySelectorAll("span").forEach((el,i)=>el.textContent=base.concat(extra)[i]);
