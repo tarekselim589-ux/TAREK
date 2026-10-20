@@ -146,6 +146,7 @@ summary.x::-webkit-details-marker{display:none}
 .fold{display:flex;flex-direction:column;gap:8px;border-top:1px solid var(--line);padding-top:8px}
 .fold .row>label{flex:1 1 70px}
 .fed{gap:6px}
+.fno{min-width:22px;height:22px;border-radius:999px;background:var(--tint);color:var(--blue);font:700 13px var(--display);display:inline-flex;align-items:center;justify-content:center;padding:0 5px}
 @media (prefers-reduced-motion:reduce){*{transition:none!important}}
 </style>
 
@@ -798,13 +799,19 @@ function fitHist(t){
     : `<button type="button" class="x fo-open" style="align-self:flex-start">+ Add old subscription</button>`;
   return out;
 }
+async function fitMove(id,pos){
+  const rows=[...FIT].sort((a,b)=>(a.order||0)-(b.order||0)), from=rows.findIndex(x=>x.id===id);
+  pos=Math.min(Math.max(1,pos),rows.length)-1; if(from<0||from===pos) return;
+  const [t]=rows.splice(from,1); rows.splice(pos,0,t);
+  for(let i=0;i<rows.length;i++){ if(rows[i].order!==i+1) await fitSave(rows[i].id,{order:i+1}); }
+}
 function renderFit(){
   $("fitTab").textContent=FITTITLE;
   if(document.activeElement!==$("fitTitle")) $("fitTitle").value=FITTITLE;
   const list=$("fitList"), rows=[...FIT].sort((a,b)=>(a.order||0)-(b.order||0));
   let soon=0;
   if(!rows.length){ list.innerHTML=`<p class="empty">No trainees yet. Open “Edit trainees” below and add the first name.</p>`; }
-  else list.innerHTML=rows.map(t=>{
+  else list.innerHTML=rows.map((t,ix)=>{
     const m=fitMarks(t), filled=m.filter(Boolean).length, pres=m.filter(x=>x==="p").length, full=filled===m.length, isSoon=filled>=m.length-1;
     if(isSoon) soon++;
     const boxes=m.map((x,i)=>`<button type="button" class="fc ${x}" data-id="${t.id}" data-i="${i}" aria-label="Session ${i+1}"><span class="fd">${t.start?ddmm(addDays(t.start,7*i)):"#"+(i+1)}</span><span class="fm">${x==="p"?"✓":x==="a"?"✗":""}</span></button>`).join("");
@@ -813,7 +820,7 @@ function renderFit(){
     const rnw=FITRENEW===t.id?`<div class="fed"><div class="row" style="align-items:end"><label>Renew from<select class="fr-date">${tueOptions(nextTue)}</select></label>
         <button type="button" class="btn fr-go" style="flex:0 0 auto">Renew</button><button type="button" class="x fr-no" style="flex:0 0 auto">Close</button></div>${fitHist(t)}</div>`:"";
     const ed=FITOPEN===t.id?`<div class="fed">
-        <div class="row"><label>Name<input class="fe-name" maxlength="40" autocomplete="off"></label>
+        <div class="row"><label style="flex:0 1 80px">Position<input class="fe-pos" type="number" inputmode="numeric" min="1" max="${rows.length}" value="${ix+1}"></label><label>Name<input class="fe-name" maxlength="40" autocomplete="off"></label>
         <label style="flex:0 1 90px">Sessions<input class="fe-n" type="number" inputmode="numeric" min="1" max="30" value="${m.length}"></label>
         <label style="flex:0 1 90px">Renewals<input class="fe-r" type="number" inputmode="numeric" min="0" value="${+t.renewals||0}"></label></div>
         <label>Start (Tuesday)<select class="fe-s">${tueOptions(t.start||lastTue())}</select></label>
@@ -822,13 +829,13 @@ function renderFit(){
           ${t.prev?`<button type="button" class="x fe-undo" style="flex:0 0 auto">Undo renew</button>`:""}
           <button type="button" class="x fe-del" style="flex:0 0 auto">Delete trainee</button>
         </div></div>`:"";
-    return `<div class="fr${isSoon?" soon":""}" data-row="${t.id}"><div class="fn"><button type="button" class="fnm" data-rn="${t.id}"></button>${+t.renewals?`<small>×${+t.renewals}</small>`:""}<button type="button" class="x ed" data-edit="${t.id}">${FITOPEN===t.id?"Close":"Edit"}</button></div>${end}<div class="fbx">${boxes}</div>${rnw}${ed}</div>`;
+    return `<div class="fr${isSoon?" soon":""}" data-row="${t.id}"><div class="fn"><span class="fno">${ix+1}</span><button type="button" class="fnm" data-rn="${t.id}"></button>${+t.renewals?`<small>×${+t.renewals}</small>`:""}<button type="button" class="x ed" data-edit="${t.id}">${FITOPEN===t.id?"Close":"Edit"}</button></div>${end}<div class="fbx">${boxes}</div>${rnw}${ed}</div>`;
   }).join("");
   list.querySelectorAll(".fr").forEach(r=>{ const t=FIT.find(x=>x.id===r.dataset.row); r.querySelector(".fnm").textContent=t.name; const ni=r.querySelector(".fe-name"); if(ni) ni.value=t.name; });
   $("fitSum").innerHTML=`<span>Trainees: <b>${rows.length}</b></span><span>Need renewal soon: <b>${soon}</b></span>`;
   $("fitTab").classList.toggle("due",soon>0);
 }
-$("fitList").addEventListener("click",e=>{
+$("fitList").addEventListener("click",async e=>{
   const c=e.target.closest(".fc");
   if(c){ const t=FIT.find(x=>x.id===c.dataset.id); const m=fitMarks(t), i=+c.dataset.i; m[i]=m[i]===""?"p":m[i]==="p"?"a":""; fitSave(t.id,{marks:m}); return; }
   const rn=e.target.closest("[data-renew],[data-rn]");
@@ -856,7 +863,9 @@ $("fitList").addEventListener("click",e=>{
     const name=row.querySelector(".fe-name").value.trim(), n=parseInt(row.querySelector(".fe-n").value,10), r=parseInt(row.querySelector(".fe-r").value,10);
     if(!name||!(n>=1&&n<=30)||!(r>=0)){ fail("Check the name, sessions (1 to 30) and renewals."); return; }
     const m=fitMarks(t).slice(0,n); while(m.length<n) m.push("");
-    FITOPEN=null; fitSave(t.id,{name,n,renewals:r,marks:m,start:row.querySelector(".fe-s").value}); return;
+    const pos=parseInt(row.querySelector(".fe-pos").value,10);
+    FITOPEN=null; await fitSave(t.id,{name,n,renewals:r,marks:m,start:row.querySelector(".fe-s").value});
+    if(pos>=1) await fitMove(t.id,pos); return;
   }
   if(e.target.closest(".fe-undo")&&t.prev){ FITOPEN=null; fitSave(t.id,{marks:t.prev.marks,renewals:t.prev.renewals,start:t.prev.start||null,prev:null,hist:(t.hist||[]).slice(0,-1)}); return; }
   const del=e.target.closest(".fe-del");
