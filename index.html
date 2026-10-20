@@ -238,7 +238,7 @@ summary.x::-webkit-details-marker{display:none}
   <section class="panel" id="p-fit" hidden>
     <div class="sub" id="fitSum"></div>
     <div class="card" id="fitList"></div>
-    <p class="note">Tap any box to change it: empty → ✓ Present → ✗ Absent → empty. Tap a name to renew it from a new Tuesday. Orange name = 1 session left or finished.</p>
+    <p class="note">Tap any box to change it: empty → ✓ Present → ✗ Absent → empty. Each ✗ adds a make-up Tuesday at the end. Tap a name to renew it from a new Tuesday. Orange name = 1 session left or finished.</p>
     <details class="pvEd" id="fitEdWrap"><summary class="x">Edit trainees</summary>
       <div class="card" style="margin-top:8px;display:flex;flex-direction:column;gap:10px">
         <form class="row" id="fitAdd" novalidate>
@@ -776,7 +776,7 @@ const fitSave=async(id,patch)=>{
   const old={...t}; Object.assign(t,patch); renderFit();
   if(db){ try{ await db.doc("fit/"+id).set(Object.fromEntries(Object.entries(t).filter(([k])=>k!=="id"))); }catch(x){ Object.keys(t).forEach(k=>delete t[k]); Object.assign(t,old); renderFit(); fail("Not saved. Check your internet and try again."); } }
 };
-function fitMarks(t){ const n=Math.max(1,+t.n||4), m=(t.marks||[]).slice(0,n); while(m.length<n) m.push(""); return m; }
+function fitMarks(t){ const n=Math.max(1,+t.n||4), src=t.marks||[], m=[]; let ok=0,i=0; while(ok<n&&i<200){ const v=src[i]||""; m.push(v); if(v!=="a") ok++; i++; } return m; }
 function fitLine(no,x,cur,idx){
   const n=x.marks?x.marks.length:(+x.n||4), p=x.marks?x.marks.filter(v=>v==="p").length:(+x.p||0), a=x.marks?x.marks.filter(v=>v==="a").length:(+x.a||0);
   const yy=k=>ddmm(k)+"/"+String(parse(k).getFullYear()).slice(2);
@@ -812,16 +812,16 @@ function renderFit(){
   let soon=0;
   if(!rows.length){ list.innerHTML=`<p class="empty">No trainees yet. Open “Edit trainees” below and add the first name.</p>`; }
   else list.innerHTML=rows.map((t,ix)=>{
-    const m=fitMarks(t), filled=m.filter(Boolean).length, pres=m.filter(x=>x==="p").length, full=filled===m.length, isSoon=filled>=m.length-1;
+    const m=fitMarks(t), nn=Math.max(1,+t.n||4), filled=m.filter(Boolean).length, pres=m.filter(x=>x==="p").length, full=filled===m.length, isSoon=(m.length-filled)<=1;
     if(isSoon) soon++;
     const boxes=m.map((x,i)=>`<button type="button" class="fc ${x}" data-id="${t.id}" data-i="${i}" aria-label="Session ${i+1}"><span class="fd">${t.start?ddmm(addDays(t.start,7*i)):"#"+(i+1)}</span><span class="fm">${x==="p"?"✓":x==="a"?"✗":""}</span></button>`).join("");
-    const end=full?`<button type="button" class="frn" data-renew="${t.id}">Renew</button>`:`<span class="fct">${pres}/${m.length}</span>`;
+    const end=full?`<button type="button" class="frn" data-renew="${t.id}">Renew</button>`:`<span class="fct">${pres}/${nn}</span>`;
     const nextTue=t.start?addDays(t.start,7*m.length):lastTue();
     const rnw=FITRENEW===t.id?`<div class="fed"><div class="row" style="align-items:end"><label>Renew from<select class="fr-date">${tueOptions(nextTue)}</select></label>
         <button type="button" class="btn fr-go" style="flex:0 0 auto">Renew</button><button type="button" class="x fr-no" style="flex:0 0 auto">Close</button></div>${fitHist(t)}</div>`:"";
     const ed=FITOPEN===t.id?`<div class="fed">
         <div class="row"><label style="flex:0 1 80px">Position<input class="fe-pos" type="number" inputmode="numeric" min="1" max="${rows.length}" value="${ix+1}"></label><label>Name<input class="fe-name" maxlength="40" autocomplete="off"></label>
-        <label style="flex:0 1 90px">Sessions<input class="fe-n" type="number" inputmode="numeric" min="1" max="30" value="${m.length}"></label>
+        <label style="flex:0 1 90px">Sessions<input class="fe-n" type="number" inputmode="numeric" min="1" max="30" value="${nn}"></label>
         <label style="flex:0 1 90px">Renewals<input class="fe-r" type="number" inputmode="numeric" min="0" value="${+t.renewals||0}"></label></div>
         <label>Start (Tuesday)<select class="fe-s">${tueOptions(t.start||lastTue())}</select></label>
         <div class="row" style="align-items:center">
@@ -858,11 +858,11 @@ $("fitList").addEventListener("click",async e=>{
     fitSave(t.id,{hist:h,renewals:Math.max(h.length,(+t.renewals||0)-1),prev:null}); return;
   }
   if(e.target.closest(".fr-go")){ const st=row.querySelector(".fr-date").value; FITRENEW=null;
-    fitSave(t.id,{prev:{marks:fitMarks(t),renewals:+t.renewals||0,start:t.start||null},hist:[...(t.hist||[]),{start:t.start||null,marks:fitMarks(t)}],marks:fitMarks(t).map(()=>""),renewals:(+t.renewals||0)+1,start:st}); return; }
+    fitSave(t.id,{prev:{marks:fitMarks(t),renewals:+t.renewals||0,start:t.start||null},hist:[...(t.hist||[]),{start:t.start||null,marks:fitMarks(t),n:+t.n||4}],marks:Array(Math.max(1,+t.n||4)).fill(""),renewals:(+t.renewals||0)+1,start:st}); return; }
   if(e.target.closest(".fe-save")){
     const name=row.querySelector(".fe-name").value.trim(), n=parseInt(row.querySelector(".fe-n").value,10), r=parseInt(row.querySelector(".fe-r").value,10);
     if(!name||!(n>=1&&n<=30)||!(r>=0)){ fail("Check the name, sessions (1 to 30) and renewals."); return; }
-    const m=fitMarks(t).slice(0,n); while(m.length<n) m.push("");
+    const m=fitMarks({...t,n});
     const pos=parseInt(row.querySelector(".fe-pos").value,10);
     FITOPEN=null; await fitSave(t.id,{name,n,renewals:r,marks:m,start:row.querySelector(".fe-s").value});
     if(pos>=1) await fitMove(t.id,pos); return;
