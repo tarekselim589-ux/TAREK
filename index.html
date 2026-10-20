@@ -119,6 +119,20 @@ summary.x::-webkit-details-marker{display:none}
 .srcw{padding:10px 14px;display:flex;flex-direction:column;gap:6px}
 .srch{display:flex;align-items:center;justify-content:space-between;font-size:12.5px;color:var(--muted);font-weight:600}
 .srcw .src{padding:0}
+.fr{display:grid;grid-template-columns:minmax(0,1fr) auto 58px;gap:8px;align-items:center;padding:8px 0;border-top:1px solid var(--line)}
+.fr:first-child{border-top:0}
+.fr .fn{display:flex;align-items:center;gap:6px;flex-wrap:wrap;min-width:0}
+.fr .fn b{font-weight:600;font-size:14px;overflow-wrap:anywhere}
+.fr .fn small{font:600 12px var(--display);color:var(--muted)}
+.fr.soon .fn b{color:var(--warn)}
+.fr .ed{font-size:11.5px;padding:1px 7px}
+.fbx{display:flex;flex-wrap:wrap;gap:5px;justify-content:flex-end;max-width:190px}
+.fc{width:40px;height:38px;border-radius:8px;border:1.5px solid var(--line);background:var(--card);font:700 17px var(--body);color:var(--muted);padding:0;cursor:pointer}
+.fc.p{background:var(--oktint);border-color:var(--ok);color:var(--ok)}
+.fc.a{background:var(--badtint);border-color:var(--bad);color:var(--bad)}
+.fct{font:700 15px var(--display);text-align:center}
+.frn{font:600 12.5px var(--body);border:1.5px solid var(--warn);color:var(--warn);background:var(--goldtint);border-radius:8px;padding:7px 2px;cursor:pointer}
+.fed{grid-column:1/-1;display:flex;flex-direction:column;gap:8px;background:var(--bg);border-radius:10px;padding:10px}
 @media (prefers-reduced-motion:reduce){*{transition:none!important}}
 </style>
 
@@ -140,6 +154,7 @@ summary.x::-webkit-details-marker{display:none}
   <nav class="tabs" role="tablist" id="tabs">
     <button role="tab" aria-selected="true" data-tab="bank">BANK</button>
     <span id="pvTabs" style="display:contents"></span>
+    <button role="tab" aria-selected="false" data-tab="fit" id="fitTab">Fitness</button>
     <button role="tab" aria-selected="false" data-tab="add" class="addtab" aria-label="Add private">+</button>
   </nav>
 
@@ -204,6 +219,27 @@ summary.x::-webkit-details-marker{display:none}
   </section>
 
   <div id="pvPanels" style="display:contents"></div>
+
+  <!-- FITNESS GROUP -->
+  <section class="panel" id="p-fit" hidden>
+    <div class="sub" id="fitSum"></div>
+    <div class="card" id="fitList"></div>
+    <p class="note">Tap any box to change it: empty → ✓ Present → ✗ Absent → empty. Orange name = 1 session left or finished.</p>
+    <details class="pvEd" id="fitEdWrap"><summary class="x">Edit trainees</summary>
+      <div class="card" style="margin-top:8px;display:flex;flex-direction:column;gap:10px">
+        <form class="row" id="fitAdd" novalidate>
+          <label>Trainee name<input id="fitName" maxlength="40" autocomplete="off"></label>
+          <label style="flex:0 1 110px">Sessions<input id="fitN" type="number" inputmode="numeric" min="1" max="30" value="4"></label>
+          <button class="btn" type="submit" style="flex:0 0 auto">Add</button>
+        </form>
+        <p class="err" id="fitAddErr" hidden></p>
+        <form class="row" id="fitTitleF" novalidate>
+          <label>Tab name<input id="fitTitle" maxlength="30" autocomplete="off"></label>
+          <button class="btn" type="submit" style="flex:0 0 auto">Save</button>
+        </form>
+      </div>
+    </details>
+  </section>
 
   <!-- ADD PRIVATE -->
   <section class="panel" id="p-add" hidden>
@@ -273,7 +309,7 @@ let CUR="bank";
 
 /* tabs */
 function showTab(t){
-  if(t!=="bank"&&t!=="add"&&!CFG[t]) t="bank";
+  if(t!=="bank"&&t!=="add"&&t!=="fit"&&!CFG[t]) t="bank";
   CUR=t;
   if(t!=="bank") lockBank();
   document.querySelectorAll(".tabs button").forEach(b=>b.setAttribute("aria-selected",b.dataset.tab===t));
@@ -384,7 +420,8 @@ $("bkBtn").onclick=async()=>{
     bank:S.bank.map(strip),
     privates:PRIV.map(strip),
     packages:Object.fromEntries(PRIV.map(p=>[p.id,(S.pk[p.id]||[]).map(strip)])),
-    attendance:Object.fromEntries(PRIV.map(p=>[p.id,S.att[p.id]||{}]))};
+    attendance:Object.fromEntries(PRIV.map(p=>[p.id,S.att[p.id]||{}])),
+    fitness:{title:FITTITLE,trainees:FIT.map(strip)}};
   const d=new Date(), name=`TAREK-backup-${d.getFullYear()}-${pad(d.getMonth()+1)}-${pad(d.getDate())}.json`;
   try{
     const url=URL.createObjectURL(new Blob([JSON.stringify(data,null,2)],{type:"application/json"}));
@@ -419,6 +456,7 @@ $("impGo").onclick=async()=>{
     ((j.packages||{})[p.id]||[]).forEach(k=>items.push([p.pcol+"/"+k.id,clean(k)]));
     Object.entries((j.attendance||{})[p.id]||{}).forEach(([day,v])=>items.push([p.col+"/"+day,{s:v}]));
   });
+  if(j.fitness){ (j.fitness.trainees||[]).forEach(t=>items.push(["fit/"+t.id,clean(t)])); if(j.fitness.title) items.push(["settings/fitness",{title:j.fitness.title}]); }
   try{ await db.batchSet(items); msg.textContent=`Imported ${items.length} items.`; msg.style.color="var(--ok)"; $("impBox").hidden=true; IMP=null; }
   catch(x){ msg.textContent="Import didn't finish. Try again."; msg.style.color="var(--bad)"; }
   msg.hidden=false; go.disabled=false; go.textContent="Confirm import";
@@ -671,7 +709,7 @@ function buildPrivates(list){
     renderPk(k); renderAtt(k);
     if(db&&!SUBS[k]) subscribe(k);
   });
-  showTab(CUR==="bank"||CUR==="add"?(CFG[SAVED]?SAVED:CUR):CUR);
+  showTab(CUR==="bank"||CUR==="add"?((CFG[SAVED]||SAVED==="fit")?SAVED:CUR):CUR);
   SAVED=null;
 }
 function subscribe(k){
@@ -711,6 +749,79 @@ $("addForm").addEventListener("submit",async e=>{
 
 renderBank();
 
+/* FITNESS GROUP */
+let FIT=[], FITTITLE="Fitness", FITOPEN=null;
+const fitSave=async(id,patch)=>{
+  const t=FIT.find(x=>x.id===id); if(!t) return;
+  const old={...t}; Object.assign(t,patch); renderFit();
+  if(db){ try{ await db.doc("fit/"+id).set(Object.fromEntries(Object.entries(t).filter(([k])=>k!=="id"))); }catch(x){ Object.keys(t).forEach(k=>delete t[k]); Object.assign(t,old); renderFit(); fail("Not saved. Check your internet and try again."); } }
+};
+function fitMarks(t){ const n=Math.max(1,+t.n||4), m=(t.marks||[]).slice(0,n); while(m.length<n) m.push(""); return m; }
+function renderFit(){
+  $("fitTab").textContent=FITTITLE;
+  if(document.activeElement!==$("fitTitle")) $("fitTitle").value=FITTITLE;
+  const list=$("fitList"), rows=[...FIT].sort((a,b)=>(a.order||0)-(b.order||0));
+  let soon=0;
+  if(!rows.length){ list.innerHTML=`<p class="empty">No trainees yet. Open “Edit trainees” below and add the first name.</p>`; }
+  else list.innerHTML=rows.map(t=>{
+    const m=fitMarks(t), filled=m.filter(Boolean).length, pres=m.filter(x=>x==="p").length, full=filled===m.length, isSoon=filled>=m.length-1;
+    if(isSoon) soon++;
+    const boxes=m.map((x,i)=>`<button type="button" class="fc ${x}" data-id="${t.id}" data-i="${i}" aria-label="Session ${i+1}">${x==="p"?"✓":x==="a"?"✗":""}</button>`).join("");
+    const end=full?`<button type="button" class="frn" data-renew="${t.id}">Renew</button>`:`<span class="fct">${pres}/${m.length}</span>`;
+    const ed=FITOPEN===t.id?`<div class="fed">
+        <div class="row"><label>Name<input class="fe-name" maxlength="40" autocomplete="off"></label>
+        <label style="flex:0 1 90px">Sessions<input class="fe-n" type="number" inputmode="numeric" min="1" max="30" value="${m.length}"></label>
+        <label style="flex:0 1 90px">Renewals<input class="fe-r" type="number" inputmode="numeric" min="0" value="${+t.renewals||0}"></label></div>
+        <div class="row" style="align-items:center">
+          <button type="button" class="btn fe-save" style="flex:0 0 auto">Save</button>
+          ${t.prev?`<button type="button" class="x fe-undo" style="flex:0 0 auto">Undo renew</button>`:""}
+          <button type="button" class="x fe-del" style="flex:0 0 auto">Delete trainee</button>
+        </div></div>`:"";
+    return `<div class="fr${isSoon?" soon":""}" data-row="${t.id}"><div class="fn"><b></b>${+t.renewals?`<small>×${+t.renewals}</small>`:""}<button type="button" class="x ed" data-edit="${t.id}">${FITOPEN===t.id?"Close":"Edit"}</button></div><div class="fbx">${boxes}</div>${end}${ed}</div>`;
+  }).join("");
+  list.querySelectorAll(".fr").forEach(r=>{ const t=FIT.find(x=>x.id===r.dataset.row); r.querySelector(".fn b").textContent=t.name; const ni=r.querySelector(".fe-name"); if(ni) ni.value=t.name; });
+  $("fitSum").innerHTML=`<span>Trainees: <b>${rows.length}</b></span><span>Need renewal soon: <b>${soon}</b></span>`;
+  $("fitTab").classList.toggle("due",soon>0);
+}
+$("fitList").addEventListener("click",e=>{
+  const c=e.target.closest(".fc");
+  if(c){ const t=FIT.find(x=>x.id===c.dataset.id); const m=fitMarks(t), i=+c.dataset.i; m[i]=m[i]===""?"p":m[i]==="p"?"a":""; fitSave(t.id,{marks:m}); return; }
+  const rn=e.target.closest("[data-renew]");
+  if(rn){ const t=FIT.find(x=>x.id===rn.dataset.renew); fitSave(t.id,{prev:{marks:fitMarks(t),renewals:+t.renewals||0},marks:fitMarks(t).map(()=>""),renewals:(+t.renewals||0)+1}); return; }
+  const ed=e.target.closest("[data-edit]");
+  if(ed){ FITOPEN=FITOPEN===ed.dataset.edit?null:ed.dataset.edit; renderFit(); return; }
+  const row=e.target.closest(".fr"); if(!row) return; const t=FIT.find(x=>x.id===row.dataset.row);
+  if(e.target.closest(".fe-save")){
+    const name=row.querySelector(".fe-name").value.trim(), n=parseInt(row.querySelector(".fe-n").value,10), r=parseInt(row.querySelector(".fe-r").value,10);
+    if(!name||!(n>=1&&n<=30)||!(r>=0)){ fail("Check the name, sessions (1 to 30) and renewals."); return; }
+    const m=fitMarks(t).slice(0,n); while(m.length<n) m.push("");
+    FITOPEN=null; fitSave(t.id,{name,n,renewals:r,marks:m}); return;
+  }
+  if(e.target.closest(".fe-undo")&&t.prev){ FITOPEN=null; fitSave(t.id,{marks:t.prev.marks,renewals:t.prev.renewals,prev:null}); return; }
+  const del=e.target.closest(".fe-del");
+  if(del){
+    if(!del.classList.contains("arm")){ del.classList.add("arm"); del.textContent="Sure? Tap again"; setTimeout(()=>{ if(del.isConnected){del.classList.remove("arm"); del.textContent="Delete trainee";} },3000); return; }
+    FITOPEN=null; const keep=[...FIT]; FIT=FIT.filter(x=>x.id!==t.id); renderFit();
+    if(db) db.doc("fit/"+t.id).delete().catch(()=>{ FIT=keep; renderFit(); fail("Not deleted. Try again."); });
+  }
+});
+$("fitAdd").addEventListener("submit",async e=>{
+  e.preventDefault(); const er=$("fitAddErr"); er.hidden=true;
+  const name=$("fitName").value.trim(), n=parseInt($("fitN").value,10);
+  if(!name){er.textContent="Enter the trainee's name.";er.hidden=false;return;}
+  if(!(n>=1&&n<=30)){er.textContent="Sessions must be 1 to 30.";er.hidden=false;return;}
+  const id="f"+Date.now().toString(36), t={name,n,marks:Array(n).fill(""),renewals:0,order:Date.now()};
+  $("fitName").value=""; $("fitName").focus();
+  FIT.push({id,...t}); renderFit();
+  if(db){ try{ await db.doc("fit/"+id).set(t); }catch(x){ FIT=FIT.filter(z=>z.id!==id); renderFit(); er.textContent="Not saved. Try again."; er.hidden=false; } }
+});
+$("fitTitleF").addEventListener("submit",async e=>{
+  e.preventDefault(); const v=$("fitTitle").value.trim(); if(!v) return;
+  const old=FITTITLE; FITTITLE=v; renderFit();
+  if(db){ try{ await db.doc("settings/fitness").set({title:v}); }catch(x){ FITTITLE=old; renderFit(); fail("Not saved. Try again."); } }
+});
+renderFit();
+
 /* storage (Firebase) */
 async function startData(){
   db.doc("settings/start").onSnapshot(snap=>{ const d=snap.exists?snap.data():null; STARTS=(d&&d.by)||{}; try{drawStart();}catch(e){} },()=>{});
@@ -722,6 +833,8 @@ async function startData(){
   db.collection("bank").onSnapshot(snap=>{
     S.bank=snap.docs.map(d=>({id:d.id,...d.data()})); renderBank();
   },()=>fail("Lost connection to your saved data. Reload the page."));
+  db.collection("fit").onSnapshot(snap=>{ FIT=snap.docs.map(d=>({id:d.id,...d.data()})).filter(t=>t.name); renderFit(); },()=>fail("Lost connection to your saved data. Reload the page."));
+  db.doc("settings/fitness").onSnapshot(snap=>{ const d=snap.exists?snap.data():null; FITTITLE=(d&&d.title)||"Fitness"; renderFit(); },()=>{});
   db.collection("privates").onSnapshot(snap=>{
     PRIV=snap.docs.map(d=>({id:d.id,...d.data()})).filter(p=>p.name&&p.col&&p.pcol);
     buildPrivates(PRIV);
