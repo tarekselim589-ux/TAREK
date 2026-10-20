@@ -138,6 +138,14 @@ summary.x::-webkit-details-marker{display:none}
 .fct{font:700 15px var(--display);text-align:center}
 .frn{font:600 12.5px var(--body);border:1.5px solid var(--warn);color:var(--warn);background:var(--goldtint);border-radius:8px;padding:6px 10px;cursor:pointer}
 .fed{grid-column:1/-1;display:flex;flex-direction:column;gap:8px;background:var(--bg);border-radius:10px;padding:10px}
+.fh{display:grid;grid-template-columns:34px minmax(0,1fr) auto auto;gap:8px;align-items:center;font-size:13.5px;padding:6px 0;border-top:1px solid var(--line)}
+.fh b{font:700 15px var(--display);color:var(--muted)}
+.fh.cur b,.fh.cur span{color:var(--ink)}
+.fh .fhs{font-variant-numeric:tabular-nums;color:var(--muted);white-space:nowrap}
+.fh .fh-del{font-size:11.5px;padding:1px 7px}
+.fold{display:flex;flex-direction:column;gap:8px;border-top:1px solid var(--line);padding-top:8px}
+.fold .row>label{flex:1 1 70px}
+.fed{gap:6px}
 @media (prefers-reduced-motion:reduce){*{transition:none!important}}
 </style>
 
@@ -756,11 +764,11 @@ $("addForm").addEventListener("submit",async e=>{
 renderBank();
 
 /* FITNESS GROUP */
-let FIT=[], FITTITLE="Fitness", FITOPEN=null, FITRENEW=null;
+let FIT=[], FITTITLE="Fitness", FITOPEN=null, FITRENEW=null, FITOLD=null;
 const tueKey=d=>keyOf(d), addDays=(k,n)=>{const d=parse(k);d.setDate(d.getDate()+n);return keyOf(d);};
 const ddmm=k=>{const d=parse(k);return pad(d.getDate())+"/"+pad(d.getMonth()+1);};
 function lastTue(){const d=new Date(CY,CM,now.getDate());while(d.getDay()!==2)d.setDate(d.getDate()-1);return keyOf(d);}
-function tueOptions(sel){ const base=lastTue(), out=[]; for(let i=-9;i<=9;i++) out.push(addDays(base,7*i)); if(sel&&!out.includes(sel)) out.push(sel); out.sort();
+function tueOptions(sel,back=9){ const base=lastTue(), out=[]; for(let i=-back;i<=9;i++) out.push(addDays(base,7*i)); if(sel&&!out.includes(sel)) out.push(sel); out.sort();
   return out.map(k=>`<option value="${k}"${k===sel?" selected":""}>Tue ${ddmm(k)}/${parse(k).getFullYear()}</option>`).join(""); }
 const fitSave=async(id,patch)=>{
   const t=FIT.find(x=>x.id===id); if(!t) return;
@@ -768,6 +776,28 @@ const fitSave=async(id,patch)=>{
   if(db){ try{ await db.doc("fit/"+id).set(Object.fromEntries(Object.entries(t).filter(([k])=>k!=="id"))); }catch(x){ Object.keys(t).forEach(k=>delete t[k]); Object.assign(t,old); renderFit(); fail("Not saved. Check your internet and try again."); } }
 };
 function fitMarks(t){ const n=Math.max(1,+t.n||4), m=(t.marks||[]).slice(0,n); while(m.length<n) m.push(""); return m; }
+function fitLine(no,x,cur,idx){
+  const n=x.marks?x.marks.length:(+x.n||4), p=x.marks?x.marks.filter(v=>v==="p").length:(+x.p||0), a=x.marks?x.marks.filter(v=>v==="a").length:(+x.a||0);
+  const yy=k=>ddmm(k)+"/"+String(parse(k).getFullYear()).slice(2);
+  const range=x.start?`${yy(x.start)} → ${yy(addDays(x.start,7*(n-1)))}`:"No date";
+  const del=cur?"":`<button type="button" class="x fh-del" data-hi="${idx}">Delete</button>`;
+  return `<div class="fh${cur?" cur":""}"><b>#${no}</b><span>${range}</span><span class="fhs">✓ ${p} · ✗ ${a}${cur?" · now":""}</span>${del}</div>`;
+}
+function fitHistSorted(t){ return (t.hist||[]).map((x,i)=>({...x,_i:i})).sort((a,b)=>(a.start||"").localeCompare(b.start||"")); }
+function fitHist(t){
+  const h=fitHistSorted(t), unrec=Math.max(0,(+t.renewals||0)-h.length), cur=h.length+unrec+1;
+  let out=`<p class="note" style="margin:4px 0 0">Subscriptions</p>`+fitLine(cur,{start:t.start,marks:fitMarks(t)},true);
+  h.slice().reverse().forEach((x,k)=>{ out+=fitLine(unrec+h.length-k,x,false,x._i); });
+  if(unrec) out+=`<p class="note" style="margin:0">${unrec} older renewal${unrec>1?"s":""} without details.</p>`;
+  out+= FITOLD===t.id ? `<div class="fold">
+      <div class="row"><label>Start<select class="fo-s">${tueOptions(addDays(t.start||lastTue(),-28),52)}</select></label></div>
+      <div class="row"><label>Sessions<input class="fo-n" type="number" inputmode="numeric" min="1" max="30" value="4"></label>
+      <label>Present<input class="fo-p" type="number" inputmode="numeric" min="0" value="4"></label>
+      <label>Absent<input class="fo-a" type="number" inputmode="numeric" min="0" value="0"></label></div>
+      <div class="row" style="align-items:center"><button type="button" class="btn fo-save" style="flex:0 0 auto">Save</button><button type="button" class="x fo-no" style="flex:0 0 auto">Cancel</button></div></div>`
+    : `<button type="button" class="x fo-open" style="align-self:flex-start">+ Add old subscription</button>`;
+  return out;
+}
 function renderFit(){
   $("fitTab").textContent=FITTITLE;
   if(document.activeElement!==$("fitTitle")) $("fitTitle").value=FITTITLE;
@@ -781,7 +811,7 @@ function renderFit(){
     const end=full?`<button type="button" class="frn" data-renew="${t.id}">Renew</button>`:`<span class="fct">${pres}/${m.length}</span>`;
     const nextTue=t.start?addDays(t.start,7*m.length):lastTue();
     const rnw=FITRENEW===t.id?`<div class="fed"><div class="row" style="align-items:end"><label>Renew from<select class="fr-date">${tueOptions(nextTue)}</select></label>
-        <button type="button" class="btn fr-go" style="flex:0 0 auto">Renew</button><button type="button" class="x fr-no" style="flex:0 0 auto">Cancel</button></div></div>`:"";
+        <button type="button" class="btn fr-go" style="flex:0 0 auto">Renew</button><button type="button" class="x fr-no" style="flex:0 0 auto">Close</button></div>${fitHist(t)}</div>`:"";
     const ed=FITOPEN===t.id?`<div class="fed">
         <div class="row"><label>Name<input class="fe-name" maxlength="40" autocomplete="off"></label>
         <label style="flex:0 1 90px">Sessions<input class="fe-n" type="number" inputmode="numeric" min="1" max="30" value="${m.length}"></label>
@@ -806,16 +836,29 @@ $("fitList").addEventListener("click",e=>{
   const ed=e.target.closest("[data-edit]");
   if(ed){ FITOPEN=FITOPEN===ed.dataset.edit?null:ed.dataset.edit; FITRENEW=null; renderFit(); return; }
   const row=e.target.closest(".fr"); if(!row) return; const t=FIT.find(x=>x.id===row.dataset.row);
-  if(e.target.closest(".fr-no")){ FITRENEW=null; renderFit(); return; }
+  if(e.target.closest(".fr-no")){ FITRENEW=null; FITOLD=null; renderFit(); return; }
+  if(e.target.closest(".fo-open")){ FITOLD=t.id; renderFit(); return; }
+  if(e.target.closest(".fo-no")){ FITOLD=null; renderFit(); return; }
+  if(e.target.closest(".fo-save")){
+    const st=row.querySelector(".fo-s").value, n=parseInt(row.querySelector(".fo-n").value,10), p=parseInt(row.querySelector(".fo-p").value,10), a=parseInt(row.querySelector(".fo-a").value,10);
+    if(!(n>=1&&n<=30)||!(p>=0)||!(a>=0)||p+a>n){ fail("Check the numbers: present + absent can't be more than sessions."); return; }
+    FITOLD=null; fitSave(t.id,{hist:[...(t.hist||[]),{start:st,n,p,a}],renewals:(+t.renewals||0)+1}); return;
+  }
+  const hd=e.target.closest(".fh-del");
+  if(hd){
+    if(!hd.classList.contains("arm")){ hd.classList.add("arm"); hd.textContent="Sure?"; setTimeout(()=>{ if(hd.isConnected){hd.classList.remove("arm"); hd.textContent="Delete";} },3000); return; }
+    const hi=+hd.dataset.hi, h=(t.hist||[]).filter((_,i)=>i!==hi);
+    fitSave(t.id,{hist:h,renewals:Math.max(h.length,(+t.renewals||0)-1),prev:null}); return;
+  }
   if(e.target.closest(".fr-go")){ const st=row.querySelector(".fr-date").value; FITRENEW=null;
-    fitSave(t.id,{prev:{marks:fitMarks(t),renewals:+t.renewals||0,start:t.start||null},marks:fitMarks(t).map(()=>""),renewals:(+t.renewals||0)+1,start:st}); return; }
+    fitSave(t.id,{prev:{marks:fitMarks(t),renewals:+t.renewals||0,start:t.start||null},hist:[...(t.hist||[]),{start:t.start||null,marks:fitMarks(t)}],marks:fitMarks(t).map(()=>""),renewals:(+t.renewals||0)+1,start:st}); return; }
   if(e.target.closest(".fe-save")){
     const name=row.querySelector(".fe-name").value.trim(), n=parseInt(row.querySelector(".fe-n").value,10), r=parseInt(row.querySelector(".fe-r").value,10);
     if(!name||!(n>=1&&n<=30)||!(r>=0)){ fail("Check the name, sessions (1 to 30) and renewals."); return; }
     const m=fitMarks(t).slice(0,n); while(m.length<n) m.push("");
     FITOPEN=null; fitSave(t.id,{name,n,renewals:r,marks:m,start:row.querySelector(".fe-s").value}); return;
   }
-  if(e.target.closest(".fe-undo")&&t.prev){ FITOPEN=null; fitSave(t.id,{marks:t.prev.marks,renewals:t.prev.renewals,start:t.prev.start||null,prev:null}); return; }
+  if(e.target.closest(".fe-undo")&&t.prev){ FITOPEN=null; fitSave(t.id,{marks:t.prev.marks,renewals:t.prev.renewals,start:t.prev.start||null,prev:null,hist:(t.hist||[]).slice(0,-1)}); return; }
   const del=e.target.closest(".fe-del");
   if(del){
     if(!del.classList.contains("arm")){ del.classList.add("arm"); del.textContent="Sure? Tap again"; setTimeout(()=>{ if(del.isConnected){del.classList.remove("arm"); del.textContent="Delete trainee";} },3000); return; }
