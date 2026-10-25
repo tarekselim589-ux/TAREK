@@ -651,8 +651,8 @@ async function cardBlob(k,pk){
   ctx.fillStyle=C.chip; ctx.fillRect(PAD,y,W-2*PAD,110); ctx.fillStyle="#fff"; ctx.font="600 32px "+FF; ctx.fillText(done?"PACKAGE COMPLETE":"IN PROGRESS",PAD+36,y+66);
   ctx.font="italic 600 52px "+FF; ctx.textAlign="right"; ctx.fillText(pr+" of "+n,W-PAD-36,y+72); ctx.textAlign="left"; y+=110;
   ctx.fillStyle=C.line; ctx.fillRect(PAD,y,W-2*PAD,14); ctx.fillStyle=C.ok; ctx.fillRect(PAD,y,(W-2*PAD)*Math.min(1,pr/n),14); y+=14+36;
-  const bw=(W-2*PAD-3*20)/4, rate=(pr+ab)?Math.round(pr/(pr+ab)*100)+"%":"–";
-  const stats=[["ATTENDED",String(pr),C.ok],["REMAINING",String(left),left?C.chip:C.muted],["ABSENT",String(ab),ab?C.bad:C.muted],["RATE",rate,C.chip]];
+  const bw=(W-2*PAD-2*20)/3;
+  const stats=[["ATTENDED",String(pr),C.ok],["REMAINING",String(left),left?C.chip:C.muted],["ABSENT",String(ab),ab?C.bad:C.muted]];
   stats.forEach((st,i)=>{ const x=PAD+i*(bw+20); ctx.strokeStyle=C.line; ctx.lineWidth=2; ctx.strokeRect(x,y,bw,128);
     ctx.fillStyle=C.muted; ctx.font="600 21px "+FF; ctx.textAlign="center"; ctx.fillText(st[0],x+bw/2,y+40);
     ctx.fillStyle=st[2]; ctx.font="italic 600 60px "+FF; ctx.fillText(st[1],x+bw/2,y+102); ctx.textAlign="left"; });
