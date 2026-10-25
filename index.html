@@ -101,6 +101,15 @@ summary.note{cursor:pointer}
 .src b{font-family:var(--display);font-size:20px;color:var(--ink);font-variant-numeric:tabular-nums;overflow-wrap:anywhere}
 .tabs button.due::after{content:"";display:inline-block;width:8px;height:8px;border-radius:50%;background:var(--warn);margin-inline-start:7px;vertical-align:middle}
 .soon{color:var(--warn);font-weight:700}
+.hrow{display:block;width:100%;text-align:start;font:inherit;color:var(--ink);background:none;border:0;border-top:1px solid var(--line);padding:9px 4px;cursor:pointer;border-radius:0}
+.histBox .hrow:first-child{border-top:0}
+.hrow[aria-current="true"]{background:var(--bg)}
+.hrow b{font-weight:700}
+.hmeta{display:block;font-size:12.5px;color:var(--muted);margin-top:2px}
+.hst{font-weight:700}
+.hst.ok{color:var(--ok)}
+.hst.warn{color:var(--warn)}
+.htot{font-size:12.5px;color:var(--muted);margin:8px 4px 0;padding-top:8px;border-top:1px solid var(--line)}
 summary.x{display:inline-block;list-style:none}
 summary.x::-webkit-details-marker{display:none}
 .pvEd[open] summary.x{border-color:var(--blue);color:var(--blue)}
@@ -319,7 +328,7 @@ fill($("bView"),years.filter(y=>y<2030).map(y=>({v:y,t:wyName(y)})),WYNOW);
 let db=null;
 let failT;
 function fail(msg){const f=$("fail");f.textContent=msg||"Something didn't save. Check your internet and try again.";f.hidden=false;clearTimeout(failT);failT=setTimeout(()=>f.hidden=true,6000);}
-const S={bank:[], att:{}, pk:{}, sel:{}};
+const S={bank:[], att:{}, pk:{}, sel:{}, hist:{}};
 let CUR="bank";
 
 /* tabs */
@@ -574,6 +583,25 @@ async function savePk(k,id,patch){
   if(db){await db.doc(c.pcol+"/"+id).update(patch);}
   else{Object.assign(S.pk[k].find(p=>p.id===id),patch);renderPk(k);renderAtt(k);}
 }
+/* History: every package of this private, newest first. Reads the same saved packages and attendance, saves nothing new. */
+function refreshHist(k){
+  const c=CFG[k]; if(!c) return;
+  const hb=$(c.pk)&&$(c.pk).querySelector(".histBox"); if(!hb) return;
+  const list=S.pk[k]||[], map=S.att[k]||{}; let tp=0, ta=0;
+  const rows=list.map((p,i)=>{
+    const out=sessions(k,p); if(!out.length) return "";
+    const pr=out.filter(o=>map[o.key]==="p").length, ab=out.filter(o=>map[o.key]==="a").length, un=out.length-pr-ab;
+    tp+=pr; ta+=ab;
+    const first=out[0].key, last=out[out.length-1].key;
+    const st=pr>=c.n?`<span class="hst ok">Complete</span>`:last<todayKey?`<span class="hst warn">Ended · ${un} not marked</span>`:`<span class="hst">In progress</span>`;
+    return `<button type="button" class="hrow" data-id="${p.id}" aria-current="${p.id===S.sel[k]}"><b>Package ${i+1}</b> · ${show(first)} → ${show(last)}<span class="hmeta">Present ${pr} of ${c.n} · Absent ${ab} · ${st}</span></button>`;
+  });
+  hb.innerHTML=rows.filter(Boolean).reverse().join("")+`<p class="htot">All packages: ${list.length} · Attended ${tp} sessions · Absent ${ta}</p>`;
+  hb.querySelectorAll(".hrow").forEach(b=>b.onclick=()=>{
+    S.sel[k]=b.dataset.id; renderPk(k); renderAtt(k);
+    const t=$(c.box); if(t&&t.scrollIntoView) t.scrollIntoView({block:"start",behavior:"smooth"});
+  });
+}
 function renderPk(k){
   const c=CFG[k], list=S.pk[k], box=$(c.pk);
   const lastDays=list.length?currentDays(k,list[list.length-1]):c.days;
@@ -597,9 +625,11 @@ function renderPk(k){
         <form class="row editpk" style="margin-top:8px"><label>First session date<input type="date" class="pkEdit" value="${cur.start}"></label><button class="btn" type="submit" style="flex:0 0 auto">Save date</button></form>
         <button class="x delpk" type="button" style="margin-top:8px">Delete package</button><p class="err edErr" hidden></p>
       </details>
-      <details style="margin-top:6px"><summary class="note">New package</summary>${form}</details>`;
+      <details style="margin-top:6px"><summary class="note">New package</summary>${form}</details>
+      <details class="pkHist" style="margin-top:6px"><summary class="note">History</summary><div class="histBox" style="margin-top:6px"></div></details>`;
     const sel=box.querySelector(".pkSel"); sel.value=S.sel[k];
     sel.onchange=()=>{S.sel[k]=sel.value;renderPk(k);renderAtt(k);};
+    const hd=box.querySelector(".pkHist"); hd.open=!!S.hist[k]; hd.addEventListener("toggle",()=>{S.hist[k]=hd.open;}); refreshHist(k);
 
     const dErr=box.querySelector(".dErr");
     box.querySelector(".editdays").addEventListener("submit",async e=>{
@@ -670,7 +700,7 @@ function renderAtt(k){
   });
   $(c.tot).textContent=`${p} of ${c.n}`;
   const done=p>=c.n, left=c.n-p;
-  updateDot(k);
+  updateDot(k); refreshHist(k);
   $(c.sub).innerHTML=(done?`<span><b style="color:var(--ok)">Package complete</b></span>`:left<=2?`<span class="soon">${left} session${left===1?"":"s"} left</span>`:"")+`<span>Absences (made up): <b>${a}</b></span><span>Last session: <b>${show(out[out.length-1].key)}</b></span>`;
 }
 async function mark(k,key,v){
