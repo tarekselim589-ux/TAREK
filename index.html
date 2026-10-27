@@ -164,6 +164,10 @@ summary.x::-webkit-details-marker{display:none}
 .fold .row>label{flex:1 1 70px}
 .fed{gap:6px}
 .fno{min-width:22px;height:22px;border-radius:999px;background:var(--tint);color:var(--blue);font:700 13px var(--display);display:inline-flex;align-items:center;justify-content:center;padding:0 5px}
+.flast{display:flex;gap:14px;flex-wrap:wrap;align-items:center;background:var(--card);border:1px solid var(--line);border-radius:12px;padding:10px 14px;font-weight:600;font-size:14.5px}
+.flast b{font:700 18px var(--display)}
+.flast .ok{color:var(--ok)}
+.flast .bad{color:var(--bad)}
 @media (prefers-reduced-motion:reduce){*{transition:none!important}}
 </style>
 
@@ -256,6 +260,7 @@ summary.x::-webkit-details-marker{display:none}
     <div class="sub" id="fitSum"></div>
     <div class="card" id="fitList"></div>
     <p class="note">Tap any box to change it: empty → ✓ Present → ✗ Absent → empty. Each ✗ adds a make-up Tuesday at the end. Tap a name to renew it from a new Tuesday. Orange name = 1 session left or finished.</p>
+    <div class="flast" id="fitLast" hidden></div>
     <details class="pvEd" id="fitEdWrap"><summary class="x">Edit trainees</summary>
       <div class="card" style="margin-top:8px;display:flex;flex-direction:column;gap:10px">
         <form class="row" id="fitAdd" novalidate>
@@ -943,6 +948,11 @@ function renderFit(){
     return `<div class="fr${isSoon?" soon":""}" data-row="${t.id}"><div class="fn"><span class="fno">${ix+1}</span><button type="button" class="fnm" data-rn="${t.id}"></button>${+t.renewals?`<small>×${+t.renewals}</small>`:""}<button type="button" class="x ed" data-edit="${t.id}">${FITOPEN===t.id?"Close":"Edit"}</button></div>${end}<div class="fbx">${boxes}</div>${rnw}${ed}</div>`;
   }).join("");
   list.querySelectorAll(".fr").forEach(r=>{ const t=FIT.find(x=>x.id===r.dataset.row); r.querySelector(".fnm").textContent=t.name; const ni=r.querySelector(".fe-name"); if(ni) ni.value=t.name; });
+  const byDay={};
+  FIT.forEach(t=>{ if(!t.start) return; fitMarks(t).forEach((x,i)=>{ if(!x) return; const k=addDays(t.start,7*i); (byDay[k]=byDay[k]||{p:0,a:0})[x]++; }); });
+  const lastDay=Object.keys(byDay).sort().pop();
+  if(lastDay){ const c=byDay[lastDay]; $("fitLast").innerHTML=`<span>Tue ${ddmm(lastDay)}</span><span class="ok">✓ Present <b>${c.p}</b></span><span class="bad">✗ Absent <b>${c.a}</b></span>`; $("fitLast").hidden=false; }
+  else $("fitLast").hidden=true;
   $("fitSum").innerHTML=`<span>Trainees: <b>${rows.length}</b></span><span>Need renewal soon: <b>${soon}</b></span>`;
   $("fitTab").classList.toggle("due",soon>0);
 }
