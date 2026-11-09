@@ -220,6 +220,13 @@ select,input{background:var(--glass2);border:1px solid var(--gline);border-radiu
 
 .mtot{display:flex;justify-content:space-between;align-items:center;margin:6px 0 4px;padding:12px 14px;border-radius:12px;background:rgba(231,182,90,.12);border:1px solid rgba(231,182,90,.25);font-weight:600;font-size:15px}
 .mtot b{font:700 24px var(--display);color:var(--gold);font-variant-numeric:tabular-nums}
+
+.exph{flex:1;display:flex;align-items:center;gap:10px;background:none;border:0;color:inherit;font:inherit;padding:4px 0;cursor:pointer;text-align:start;min-width:0}
+.exph #expLbl{flex:1}
+.exph b{font:700 18px var(--display);color:#FF8C7E;font-variant-numeric:tabular-nums}
+.exph .chev{width:9px;height:9px;border-right:2px solid var(--muted);border-bottom:2px solid var(--muted);transform:rotate(45deg);transition:transform .2s;margin:0 6px 4px 2px}
+.expw.open .exph .chev{transform:rotate(225deg);margin-bottom:-4px}
+.expw .srch{gap:10px}
 </style>
 
 <div class="wrap">
@@ -281,7 +288,7 @@ select,input{background:var(--glass2);border:1px solid var(--gline);border-radiu
     <div class="total"><span id="bTotLbl">Total</span><span class="allv"><b id="bTotal">••••••</b><button type="button" id="eyeT" class="eye" aria-pressed="false" aria-label="Show total"><svg width="22" height="22" viewBox="0 0 24 24" aria-hidden="true"><path d="M2 12s3.6-6.5 10-6.5S22 12 22 12s-3.6 6.5-10 6.5S2 12 2 12z" fill="none" stroke="currentColor" stroke-width="1.8"/><circle cx="12" cy="12" r="3" fill="none" stroke="currentColor" stroke-width="1.8"/><path class="slash" d="M4 4l16 16" stroke="currentColor" stroke-width="1.8"/></svg></button></span></div>
     <div class="total all"><span id="stLbl">Starting balance</span><span class="allv"><b id="stVal">••••••</b><button type="button" id="eyeS" class="eye" aria-pressed="false" aria-label="Show starting balance"><svg width="22" height="22" viewBox="0 0 24 24" aria-hidden="true"><path d="M2 12s3.6-6.5 10-6.5S22 12 22 12s-3.6 6.5-10 6.5S2 12 2 12z" fill="none" stroke="currentColor" stroke-width="1.8"/><circle cx="12" cy="12" r="3" fill="none" stroke="currentColor" stroke-width="1.8"/><path class="slash" d="M4 4l16 16" stroke="currentColor" stroke-width="1.8"/></svg></button></span></div>
     <div class="total all"><span id="sumLbl">Starting + Total</span><span class="allv"><b id="sumVal">••••••</b><button type="button" id="eyeSum" class="eye" aria-pressed="false" aria-label="Show starting plus total"></button></span></div>
-    <div class="card expw"><div class="srch"><span id="expLbl">Expenses</span><button type="button" id="eyeExp" class="eye" aria-pressed="false" aria-label="Show expenses"></button></div><div id="expList"></div><div class="exptot"><span>Total expenses</span><b id="expTot">••••••</b></div></div>
+    <div class="card expw"><div class="srch"><button type="button" class="exph" id="expTog" aria-expanded="false"><span id="expLbl">Expenses</span><b id="expHead">••••••</b><span class="chev" aria-hidden="true"></span></button><button type="button" id="eyeExp" class="eye" aria-pressed="false" aria-label="Show expenses"></button></div><div id="expBody" hidden><div id="expList"></div><div class="exptot"><span>Total expenses</span><b id="expTot">••••••</b></div></div></div>
     <div class="total all"><span id="remLbl">Remaining</span><span class="allv"><b id="remVal">••••••</b><button type="button" id="eyeRem" class="eye" aria-pressed="false" aria-label="Show remaining"></button></span></div>
     <details class="pvEd" id="stWrap"><summary class="x">Edit starting balance</summary>
       <form class="row" id="stForm" style="margin-top:8px" novalidate>
@@ -371,7 +378,7 @@ showTab("bank");
 /* BANK LOCK */
 var UNLOCKED=false, PIN=undefined, tries=0, waitUntil=0;
 function lockBank(){
-  SHOWALL=false; SHOWREM=false; SHOWEXP=false; SHOWH=false; OPENMK=null; SHOWT=false; SHOWS=false; SHOWSRC=false; SHOWM=false; SHOWSUM=false; try{drawAll();renderBank();$("stWrap").open=false;}catch(e){}
+  SHOWALL=false; EXPOPEN=false; SHOWREM=false; SHOWEXP=false; SHOWH=false; OPENMK=null; SHOWT=false; SHOWS=false; SHOWSRC=false; SHOWM=false; SHOWSUM=false; try{drawAll();renderBank();$("stWrap").open=false;}catch(e){}
   try{$("cpWrap").open=false;["cpOld","cpNew","cpNew2"].forEach(id=>$(id).value="");$("cpErr").hidden=true;$("cpOk").hidden=true;}catch(e){}
   UNLOCKED=false; $("bankBody").hidden=true; $("bankLock").hidden=false;
   ["pin1","pin2"].forEach(id=>$(id).value=""); $("lkErr").hidden=true; drawLock();
@@ -426,7 +433,7 @@ $("cpForm").addEventListener("submit",async e=>{
   catch(x){bad("Not saved. Try again.");}
 });
 
-var SHOWALL=false, SHOWT=false, SHOWS=false, SHOWSRC=false, STARTS={}; let SHOWREM=false, SHOWEXP=false, EXP=[], ETOTAL=0; let SHOWH=false, OPENMK=null, SHOWM=false, SHOWSUM=false, YTOTAL=0;
+var SHOWALL=false, SHOWT=false, SHOWS=false, SHOWSRC=false, STARTS={}; let EXPOPEN=false, SHOWREM=false, SHOWEXP=false, EXP=[], ETOTAL=0; let SHOWH=false, OPENMK=null, SHOWM=false, SHOWSUM=false, YTOTAL=0;
 function eyeSet(id,on,what){ $(id).setAttribute("aria-pressed",on); $(id).setAttribute("aria-label",(on?"Hide ":"Show ")+what); }
 function renderExp(){
   const y=+$("bView").value, mk=r=>r.year*12+r.month;
@@ -443,6 +450,8 @@ function renderExp(){
     delExp(b.dataset.eid);
   });
   $("expTot").textContent=SHOWEXP?(ETOTAL?"−":"")+fmt(ETOTAL):"••••••";
+  $("expHead").textContent=SHOWEXP?(ETOTAL?"−":"")+fmt(ETOTAL):"••••••";
+  $("expBody").hidden=!EXPOPEN; $("expHead").hidden=EXPOPEN; $("expTog").setAttribute("aria-expanded",EXPOPEN); $("expTog").closest(".expw").classList.toggle("open",EXPOPEN);
   eyeSet("eyeExp",SHOWEXP,"expenses");
 }
 async function delExp(id){
@@ -473,6 +482,7 @@ $("eye").onclick=()=>{SHOWALL=!SHOWALL;drawAll();};
 $("eyeT").onclick=()=>{SHOWT=!SHOWT;renderBank();};
 const EYESVG=$("eye").innerHTML; $("eyeSrc").innerHTML=EYESVG;
 $("eyeSrc").onclick=()=>{SHOWSRC=!SHOWSRC;renderBank();};
+$("expTog").onclick=()=>{EXPOPEN=!EXPOPEN;renderExp();};
 $("eyeRem").innerHTML=EYESVG; $("eyeRem").onclick=()=>{SHOWREM=!SHOWREM;drawStart();};
 $("eyeExp").innerHTML=EYESVG; $("eyeExp").onclick=()=>{SHOWEXP=!SHOWEXP;renderExp();};
 
