@@ -217,6 +217,9 @@ select,input{background:var(--glass2);border:1px solid var(--gline);border-radiu
 .amt.neg{color:#FF8C7E}
 .exptot{display:flex;justify-content:space-between;align-items:center;border-top:1px solid rgba(255,255,255,.1);padding-top:8px;margin-top:2px;font-weight:600}
 .exptot b{font:700 20px var(--display);color:#FF8C7E;font-variant-numeric:tabular-nums}
+
+.mtot{display:flex;justify-content:space-between;align-items:center;margin:6px 0 4px;padding:12px 14px;border-radius:12px;background:rgba(231,182,90,.12);border:1px solid rgba(231,182,90,.25);font-weight:600;font-size:15px}
+.mtot b{font:700 24px var(--display);color:var(--gold);font-variant-numeric:tabular-nums}
 </style>
 
 <div class="wrap">
@@ -545,8 +548,8 @@ function renderBank(){
     const op=SHOWM;
     list.innerHTML=keys.map(k=>{
       const rs=rows.filter(r=>mk(r)===k), mt=rs.reduce((a,x)=>a+(+x.amount||0),0), r0=rs[0], open=k===OPENMK;
-      return `<div class="mcard${open?" open":""}"><button type="button" class="mhead" data-mk="${k}" aria-expanded="${open}"><span class="mn">${MONTHS[r0.month]} ${r0.year}</span><span class="mv">${op?fmt(mt):"••••"}</span><span class="chev" aria-hidden="true"></span></button>`+
-        (open?`<div class="mbody">`+rs.map(r=>`<div class="item"><div class="s" data-src-id="${r.id}"></div><span class="amt">${op?fmt(r.amount):"••••"}</span><button class="x" type="button" data-id="${r.id}">Delete</button></div>`).join("")+`</div>`:"")+`</div>`;
+      return `<div class="mcard${open?" open":""}"><button type="button" class="mhead" data-mk="${k}" aria-expanded="${open}"><span class="mn">${MONTHS[r0.month]} ${r0.year}</span>${open?"":`<span class="mv">${op?fmt(mt):"••••"}</span>`}<span class="chev" aria-hidden="true"></span></button>`+
+        (open?`<div class="mbody">`+rs.map(r=>`<div class="item"><div class="s" data-src-id="${r.id}"></div><span class="amt">${op?fmt(r.amount):"••••"}</span><button class="x" type="button" data-id="${r.id}">Delete</button></div>`).join("")+`<div class="mtot"><span>${MONTHS[r0.month]} total</span><b>${op?fmt(mt):"••••••"}</b></div></div>`:"")+`</div>`;
     }).join("");
     list.querySelectorAll(".mhead").forEach(b=>b.onclick=()=>{ const k=+b.dataset.mk; OPENMK=OPENMK===k?-1:k; renderBank(); });
   }
