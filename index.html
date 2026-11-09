@@ -190,7 +190,7 @@ select,input{background:var(--glass2);border:1px solid var(--gline);border-radiu
 .btn{border-radius:12px;box-shadow:0 4px 14px color-mix(in srgb,var(--blue) 35%,transparent)}
 .x,.eye{background:var(--glass2);border:1px solid var(--gline);-webkit-backdrop-filter:blur(10px);backdrop-filter:blur(10px)}
 .item{border-top-color:rgba(255,255,255,.08)}
-.hero{padding:14px 16px;display:grid;grid-template-columns:1fr 1fr;gap:12px}
+.hero{padding:14px 16px;display:grid;grid-template-columns:1fr;gap:8px}
 .hero .hv{display:flex;flex-direction:column;gap:2px;min-width:0}
 .hero .hv span{font-size:12.5px;color:var(--muted);font-weight:600}
 .hero .hv b{font:700 26px var(--display);color:var(--gold);font-variant-numeric:tabular-nums}
@@ -251,13 +251,12 @@ select,input{background:var(--glass2);border:1px solid var(--gline);border-radiu
     <div id="bankBody" class="panel" hidden>
     <div class="hero" id="hero">
       <div class="hr"><p id="heroLbl">Work year</p><button type="button" id="eyeH" class="eye" aria-pressed="false" aria-label="Show summary"></button></div>
-      <div class="hv"><span>This work year</span><b id="heroY">••••••</b></div>
       <div class="hv"><span id="heroML">This month</span><b id="heroM">••••••</b></div>
     </div>
     <form class="card" id="bankForm" novalidate>
       <div class="row">
-        <label>Month<select id="bMonth"></select></label>
-        <label>Year<select id="bYear"></select></label>
+        <label id="bMonthWrap">Month<select id="bMonth"></select></label>
+        <label id="bYearWrap">Year<select id="bYear"></select></label>
       </div>
       <div class="row" style="margin-top:8px">
         <label>Source<select id="bSource"><option value="School">School</option><option value="Academy">Academy</option><option value="Private">Private</option><option value="__new">New</option><option value="__exp">Expense</option></select></label>
@@ -280,10 +279,10 @@ select,input{background:var(--glass2);border:1px solid var(--gline);border-radiu
     </div>
 
     <div class="card srcw"><div class="srch"><span>Income by source</span><button type="button" id="eyeSrc" class="eye" aria-pressed="false" aria-label="Show income by source"></button></div><div class="src" id="bSrc"></div></div>
-    <div class="card expw"><div class="srch"><span id="expLbl">Expenses</span><button type="button" id="eyeExp" class="eye" aria-pressed="false" aria-label="Show expenses"></button></div><div id="expList"></div><div class="exptot"><span>Total expenses</span><b id="expTot">••••••</b></div></div>
     <div class="total"><span id="bTotLbl">Total</span><span class="allv"><b id="bTotal">••••••</b><button type="button" id="eyeT" class="eye" aria-pressed="false" aria-label="Show total"><svg width="22" height="22" viewBox="0 0 24 24" aria-hidden="true"><path d="M2 12s3.6-6.5 10-6.5S22 12 22 12s-3.6 6.5-10 6.5S2 12 2 12z" fill="none" stroke="currentColor" stroke-width="1.8"/><circle cx="12" cy="12" r="3" fill="none" stroke="currentColor" stroke-width="1.8"/><path class="slash" d="M4 4l16 16" stroke="currentColor" stroke-width="1.8"/></svg></button></span></div>
     <div class="total all"><span id="stLbl">Starting balance</span><span class="allv"><b id="stVal">••••••</b><button type="button" id="eyeS" class="eye" aria-pressed="false" aria-label="Show starting balance"><svg width="22" height="22" viewBox="0 0 24 24" aria-hidden="true"><path d="M2 12s3.6-6.5 10-6.5S22 12 22 12s-3.6 6.5-10 6.5S2 12 2 12z" fill="none" stroke="currentColor" stroke-width="1.8"/><circle cx="12" cy="12" r="3" fill="none" stroke="currentColor" stroke-width="1.8"/><path class="slash" d="M4 4l16 16" stroke="currentColor" stroke-width="1.8"/></svg></button></span></div>
     <div class="total all"><span id="sumLbl">Starting + Total</span><span class="allv"><b id="sumVal">••••••</b><button type="button" id="eyeSum" class="eye" aria-pressed="false" aria-label="Show starting plus total"></button></span></div>
+    <div class="card expw"><div class="srch"><span id="expLbl">Expenses</span><button type="button" id="eyeExp" class="eye" aria-pressed="false" aria-label="Show expenses"></button></div><div id="expList"></div><div class="exptot"><span>Total expenses</span><b id="expTot">••••••</b></div></div>
     <div class="total all"><span id="remLbl">Remaining</span><span class="allv"><b id="remVal">••••••</b><button type="button" id="eyeRem" class="eye" aria-pressed="false" aria-label="Show remaining"></button></span></div>
     <details class="pvEd" id="stWrap"><summary class="x">Edit starting balance</summary>
       <form class="row" id="stForm" style="margin-top:8px" novalidate>
@@ -432,12 +431,13 @@ var SHOWALL=false, SHOWT=false, SHOWS=false, SHOWSRC=false, STARTS={}; let SHOWR
 function eyeSet(id,on,what){ $(id).setAttribute("aria-pressed",on); $(id).setAttribute("aria-label",(on?"Hide ":"Show ")+what); }
 function renderExp(){
   const y=+$("bView").value, mk=r=>r.year*12+r.month;
-  const rows=EXP.filter(r=>wy(r)===y).sort((a,b)=>mk(b)-mk(a)||(b.at||0)-(a.at||0));
+  const ewy=r=>r.wy!=null?+r.wy:wy(r);
+  const rows=EXP.filter(r=>ewy(r)===y).sort((a,b)=>(b.at||0)-(a.at||0));
   ETOTAL=rows.reduce((a,r)=>a+(+r.amount||0),0);
   $("expLbl").textContent="Expenses "+wyName(y);
   const list=$("expList");
-  if(!rows.length) list.innerHTML=`<p class="empty" style="padding:8px 0">No expenses for ${wyName(y)}. Choose Expense in Source to add one.</p>`;
-  else list.innerHTML=rows.map(r=>`<div class="item ex"><div class="s"><span class="dot exp"></span><span class="en"></span><small>${MONTHS[r.month].slice(0,3)} ${r.year}</small></div><span class="amt neg">${SHOWEXP?"−"+fmt(r.amount):"••••"}</span><button class="x" type="button" data-eid="${r.id}">Delete</button></div>`).join("");
+  if(!rows.length) list.innerHTML=`<p class="empty" style="padding:8px 0">No expenses for ${wyName(y)}. Choose Expense in Source to add one. It goes into the work year shown above.</p>`;
+  else list.innerHTML=rows.map(r=>`<div class="item ex"><div class="s"><span class="dot exp"></span><span class="en"></span></div><span class="amt neg">${SHOWEXP?"−"+fmt(r.amount):"••••"}</span><button class="x" type="button" data-eid="${r.id}">Delete</button></div>`).join("");
   list.querySelectorAll(".item.ex").forEach((el,i)=>el.querySelector(".en").textContent=rows[i].note||"Expense");
   list.querySelectorAll("[data-eid]").forEach(b=>b.onclick=()=>{
     if(!b.classList.contains("arm")){b.classList.add("arm");b.textContent="Sure?";setTimeout(()=>{b.classList.remove("arm");b.textContent="Delete"},3000);return;}
@@ -534,7 +534,7 @@ function drawHero(){
   const mT=S.bank.filter(r=>r.year===CY&&r.month===CM).reduce((a,r)=>a+(+r.amount||0),0);
   $("heroLbl").textContent="Work year "+wyName(WYNOW);
   $("heroML").textContent=MONTHS[CM]+" "+CY;
-  $("heroY").textContent=SHOWH?fmt(yT):"••••••"; $("heroM").textContent=SHOWH?fmt(mT):"••••••";
+  $("heroM").textContent=SHOWH?fmt(mT):"••••••";
   eyeSet("eyeH",SHOWH,"summary");
 }
 function renderBank(){
@@ -567,7 +567,7 @@ function renderBank(){
   $("bSrc").querySelectorAll("span").forEach((el,i)=>{ const nm=base.concat(extra)[i]; el.textContent=""; const d=document.createElement("i"); d.className="dot "+(base.includes(nm)?nm:"other"); el.appendChild(d); el.appendChild(document.createTextNode(nm)); });
 }
 $("bView").onchange=renderBank;
-$("bSource").onchange=()=>{const v=$("bSource").value, n=v==="__new", x=v==="__exp";$("bNewWrap").hidden=!n;$("bExpWrap").hidden=!x;if(n)setTimeout(()=>$("bNew").focus(),30);if(x)setTimeout(()=>$("bExpNote").focus(),30);};
+$("bSource").onchange=()=>{const v=$("bSource").value, n=v==="__new", x=v==="__exp";$("bNewWrap").hidden=!n;$("bExpWrap").hidden=!x;$("bMonthWrap").hidden=x;$("bYearWrap").hidden=x;if(n)setTimeout(()=>$("bNew").focus(),30);if(x)setTimeout(()=>$("bExpNote").focus(),30);};
 $("bankForm").addEventListener("submit",async e=>{
   e.preventDefault();
   const isNew=$("bSource").value==="__new", source=isNew?$("bNew").value.trim().replace(/\s+/g," "):$("bSource").value, amount=parseFloat($("bAmount").value);
@@ -576,9 +576,8 @@ $("bankForm").addEventListener("submit",async e=>{
     const note=$("bExpNote").value.trim().replace(/\s+/g," ");
     if(!note){err.textContent="Write what the money was spent on.";err.hidden=false;return;}
     if(!(amount>0)){err.textContent="Enter the amount.";err.hidden=false;return;}
-    const r={month:+$("bMonth").value,year:+$("bYear").value,note,amount,at:Date.now()};
-    $("bAmount").value=""; $("bExpNote").value=""; $("bSource").value="School"; $("bExpWrap").hidden=true;
-    $("bView").value=wy(r);
+    const r={wy:+$("bView").value,note,amount,at:Date.now()};
+    $("bAmount").value=""; $("bExpNote").value=""; $("bSource").value="School"; $("bExpWrap").hidden=true; $("bMonthWrap").hidden=false; $("bYearWrap").hidden=false;
     if(db){try{await db.collection("expenses").add(r);}catch(x){$("bAmount").value=amount;$("bExpNote").value=note;err.textContent="Not saved. Try again.";err.hidden=false;}}
     else{EXP.push({...r,id:"l"+r.at});}
     renderBank(); return;
