@@ -249,10 +249,6 @@ select,input{background:var(--glass2);border:1px solid var(--gline);border-radiu
       <p class="err" id="lkErr" hidden></p>
     </form>
     <div id="bankBody" class="panel" hidden>
-    <div class="hero" id="hero">
-      <div class="hr"><p id="heroLbl">Work year</p><button type="button" id="eyeH" class="eye" aria-pressed="false" aria-label="Show summary"></button></div>
-      <div class="hv"><span id="heroML">This month</span><b id="heroM">••••••</b></div>
-    </div>
     <form class="card" id="bankForm" novalidate>
       <div class="row">
         <label id="bMonthWrap">Month<select id="bMonth"></select></label>
@@ -476,7 +472,7 @@ const EYESVG=$("eye").innerHTML; $("eyeSrc").innerHTML=EYESVG;
 $("eyeSrc").onclick=()=>{SHOWSRC=!SHOWSRC;renderBank();};
 $("eyeRem").innerHTML=EYESVG; $("eyeRem").onclick=()=>{SHOWREM=!SHOWREM;drawStart();};
 $("eyeExp").innerHTML=EYESVG; $("eyeExp").onclick=()=>{SHOWEXP=!SHOWEXP;renderExp();};
-$("eyeH").innerHTML=EYESVG; $("eyeH").onclick=()=>{SHOWH=!SHOWH;drawHero();};
+
 $("eyeSum").innerHTML=EYESVG; $("eyeSum").onclick=()=>{SHOWSUM=!SHOWSUM;drawStart();};
 $("eyeM").innerHTML=EYESVG; $("eyeM").onclick=()=>{SHOWM=!SHOWM;renderBank();};
 $("eyeS").onclick=()=>{SHOWS=!SHOWS;drawStart();};
@@ -529,7 +525,7 @@ $("impGo").onclick=async()=>{
 };
 
 /* BANK */
-function drawHero(){
+function drawHero(){ if(!$("hero")) return;
   const yT=S.bank.filter(r=>wy(r)===WYNOW).reduce((a,r)=>a+(+r.amount||0),0);
   const mT=S.bank.filter(r=>r.year===CY&&r.month===CM).reduce((a,r)=>a+(+r.amount||0),0);
   $("heroLbl").textContent="Work year "+wyName(WYNOW);
