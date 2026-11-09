@@ -209,6 +209,14 @@ select,input{background:var(--glass2);border:1px solid var(--gline);border-radiu
 .dot{display:inline-block;width:9px;height:9px;border-radius:50%;margin-inline-end:8px;vertical-align:middle;background:var(--cOther)}
 .dot.School{background:var(--cSchool)} .dot.Academy{background:var(--cAcademy)} .dot.Private{background:var(--cPrivate)}
 @media (prefers-reduced-motion:reduce){.mhead .chev{transition:none}}
+
+.expw{padding:10px 14px;display:flex;flex-direction:column;gap:4px}
+.item.ex .s{display:flex;align-items:center;flex-wrap:wrap;gap:0 8px}
+.item.ex small{font-size:12px;color:var(--muted);font-weight:500}
+.dot.exp{background:#FF8C7E;margin-inline-end:0}
+.amt.neg{color:#FF8C7E}
+.exptot{display:flex;justify-content:space-between;align-items:center;border-top:1px solid rgba(255,255,255,.1);padding-top:8px;margin-top:2px;font-weight:600}
+.exptot b{font:700 20px var(--display);color:#FF8C7E;font-variant-numeric:tabular-nums}
 </style>
 
 <div class="wrap">
@@ -252,8 +260,9 @@ select,input{background:var(--glass2);border:1px solid var(--gline);border-radiu
         <label>Year<select id="bYear"></select></label>
       </div>
       <div class="row" style="margin-top:8px">
-        <label>Source<select id="bSource"><option value="School">School</option><option value="Academy">Academy</option><option value="Private">Private</option><option value="__new">New</option></select></label>
+        <label>Source<select id="bSource"><option value="School">School</option><option value="Academy">Academy</option><option value="Private">Private</option><option value="__new">New</option><option value="__exp">Expense</option></select></label>
         <label id="bNewWrap" hidden>Name<input id="bNew" placeholder="Fitness" autocomplete="off" maxlength="30"></label>
+        <label id="bExpWrap" hidden>Spent on<input id="bExpNote" placeholder="Car, rent, travel…" autocomplete="off" maxlength="50"></label>
         <label>Amount<input id="bAmount" type="number" inputmode="decimal" min="0" step="any" placeholder="0"></label>
       </div>
       <div class="row" style="margin-top:10px;align-items:center">
@@ -271,9 +280,11 @@ select,input{background:var(--glass2);border:1px solid var(--gline);border-radiu
     </div>
 
     <div class="card srcw"><div class="srch"><span>Income by source</span><button type="button" id="eyeSrc" class="eye" aria-pressed="false" aria-label="Show income by source"></button></div><div class="src" id="bSrc"></div></div>
+    <div class="card expw"><div class="srch"><span id="expLbl">Expenses</span><button type="button" id="eyeExp" class="eye" aria-pressed="false" aria-label="Show expenses"></button></div><div id="expList"></div><div class="exptot"><span>Total expenses</span><b id="expTot">••••••</b></div></div>
     <div class="total"><span id="bTotLbl">Total</span><span class="allv"><b id="bTotal">••••••</b><button type="button" id="eyeT" class="eye" aria-pressed="false" aria-label="Show total"><svg width="22" height="22" viewBox="0 0 24 24" aria-hidden="true"><path d="M2 12s3.6-6.5 10-6.5S22 12 22 12s-3.6 6.5-10 6.5S2 12 2 12z" fill="none" stroke="currentColor" stroke-width="1.8"/><circle cx="12" cy="12" r="3" fill="none" stroke="currentColor" stroke-width="1.8"/><path class="slash" d="M4 4l16 16" stroke="currentColor" stroke-width="1.8"/></svg></button></span></div>
     <div class="total all"><span id="stLbl">Starting balance</span><span class="allv"><b id="stVal">••••••</b><button type="button" id="eyeS" class="eye" aria-pressed="false" aria-label="Show starting balance"><svg width="22" height="22" viewBox="0 0 24 24" aria-hidden="true"><path d="M2 12s3.6-6.5 10-6.5S22 12 22 12s-3.6 6.5-10 6.5S2 12 2 12z" fill="none" stroke="currentColor" stroke-width="1.8"/><circle cx="12" cy="12" r="3" fill="none" stroke="currentColor" stroke-width="1.8"/><path class="slash" d="M4 4l16 16" stroke="currentColor" stroke-width="1.8"/></svg></button></span></div>
     <div class="total all"><span id="sumLbl">Starting + Total</span><span class="allv"><b id="sumVal">••••••</b><button type="button" id="eyeSum" class="eye" aria-pressed="false" aria-label="Show starting plus total"></button></span></div>
+    <div class="total all"><span id="remLbl">Remaining</span><span class="allv"><b id="remVal">••••••</b><button type="button" id="eyeRem" class="eye" aria-pressed="false" aria-label="Show remaining"></button></span></div>
     <details class="pvEd" id="stWrap"><summary class="x">Edit starting balance</summary>
       <form class="row" id="stForm" style="margin-top:8px" novalidate>
         <label id="stInLbl">Starting balance<input id="stIn" type="number" inputmode="decimal" min="0" step="any"></label>
@@ -362,7 +373,7 @@ showTab("bank");
 /* BANK LOCK */
 var UNLOCKED=false, PIN=undefined, tries=0, waitUntil=0;
 function lockBank(){
-  SHOWALL=false; SHOWH=false; OPENMK=null; SHOWT=false; SHOWS=false; SHOWSRC=false; SHOWM=false; SHOWSUM=false; try{drawAll();renderBank();$("stWrap").open=false;}catch(e){}
+  SHOWALL=false; SHOWREM=false; SHOWEXP=false; SHOWH=false; OPENMK=null; SHOWT=false; SHOWS=false; SHOWSRC=false; SHOWM=false; SHOWSUM=false; try{drawAll();renderBank();$("stWrap").open=false;}catch(e){}
   try{$("cpWrap").open=false;["cpOld","cpNew","cpNew2"].forEach(id=>$(id).value="");$("cpErr").hidden=true;$("cpOk").hidden=true;}catch(e){}
   UNLOCKED=false; $("bankBody").hidden=true; $("bankLock").hidden=false;
   ["pin1","pin2"].forEach(id=>$(id).value=""); $("lkErr").hidden=true; drawLock();
@@ -417,14 +428,37 @@ $("cpForm").addEventListener("submit",async e=>{
   catch(x){bad("Not saved. Try again.");}
 });
 
-var SHOWALL=false, SHOWT=false, SHOWS=false, SHOWSRC=false, STARTS={}; let SHOWH=false, OPENMK=null, SHOWM=false, SHOWSUM=false, YTOTAL=0;
+var SHOWALL=false, SHOWT=false, SHOWS=false, SHOWSRC=false, STARTS={}; let SHOWREM=false, SHOWEXP=false, EXP=[], ETOTAL=0; let SHOWH=false, OPENMK=null, SHOWM=false, SHOWSUM=false, YTOTAL=0;
 function eyeSet(id,on,what){ $(id).setAttribute("aria-pressed",on); $(id).setAttribute("aria-label",(on?"Hide ":"Show ")+what); }
+function renderExp(){
+  const y=+$("bView").value, mk=r=>r.year*12+r.month;
+  const rows=EXP.filter(r=>wy(r)===y).sort((a,b)=>mk(b)-mk(a)||(b.at||0)-(a.at||0));
+  ETOTAL=rows.reduce((a,r)=>a+(+r.amount||0),0);
+  $("expLbl").textContent="Expenses "+wyName(y);
+  const list=$("expList");
+  if(!rows.length) list.innerHTML=`<p class="empty" style="padding:8px 0">No expenses for ${wyName(y)}. Choose Expense in Source to add one.</p>`;
+  else list.innerHTML=rows.map(r=>`<div class="item ex"><div class="s"><span class="dot exp"></span><span class="en"></span><small>${MONTHS[r.month].slice(0,3)} ${r.year}</small></div><span class="amt neg">${SHOWEXP?"−"+fmt(r.amount):"••••"}</span><button class="x" type="button" data-eid="${r.id}">Delete</button></div>`).join("");
+  list.querySelectorAll(".item.ex").forEach((el,i)=>el.querySelector(".en").textContent=rows[i].note||"Expense");
+  list.querySelectorAll("[data-eid]").forEach(b=>b.onclick=()=>{
+    if(!b.classList.contains("arm")){b.classList.add("arm");b.textContent="Sure?";setTimeout(()=>{b.classList.remove("arm");b.textContent="Delete"},3000);return;}
+    delExp(b.dataset.eid);
+  });
+  $("expTot").textContent=SHOWEXP?(ETOTAL?"−":"")+fmt(ETOTAL):"••••••";
+  eyeSet("eyeExp",SHOWEXP,"expenses");
+}
+async function delExp(id){
+  if(db){try{await db.doc("expenses/"+id).delete();}catch(x){fail("Not deleted. Try again.");}}
+  else{EXP=EXP.filter(r=>r.id!==id);renderBank();}
+}
 function drawStart(){
   const y=+$("bView").value, v=STARTS[y];
   $("stLbl").textContent="Starting balance "+wyName(y);
   $("stVal").textContent=!SHOWS?"••••••":(v==null?"Not set":fmt(v));
   $("sumLbl").textContent="Starting + Total "+wyName(y);
   $("sumVal").textContent=SHOWSUM?fmt((v||0)+YTOTAL):"••••••";
+  $("remLbl").textContent="Remaining "+wyName(y);
+  $("remVal").textContent=SHOWREM?fmt((v||0)+YTOTAL-ETOTAL):"••••••";
+  eyeSet("eyeRem",SHOWREM,"remaining");
   eyeSet("eyeSum",SHOWSUM,"starting plus total");
   eyeSet("eyeS",SHOWS,"starting balance");
   $("stInLbl").firstChild.textContent="Starting balance "+wyName(y)+"";
@@ -440,6 +474,8 @@ $("eye").onclick=()=>{SHOWALL=!SHOWALL;drawAll();};
 $("eyeT").onclick=()=>{SHOWT=!SHOWT;renderBank();};
 const EYESVG=$("eye").innerHTML; $("eyeSrc").innerHTML=EYESVG;
 $("eyeSrc").onclick=()=>{SHOWSRC=!SHOWSRC;renderBank();};
+$("eyeRem").innerHTML=EYESVG; $("eyeRem").onclick=()=>{SHOWREM=!SHOWREM;drawStart();};
+$("eyeExp").innerHTML=EYESVG; $("eyeExp").onclick=()=>{SHOWEXP=!SHOWEXP;renderExp();};
 $("eyeH").innerHTML=EYESVG; $("eyeH").onclick=()=>{SHOWH=!SHOWH;drawHero();};
 $("eyeSum").innerHTML=EYESVG; $("eyeSum").onclick=()=>{SHOWSUM=!SHOWSUM;drawStart();};
 $("eyeM").innerHTML=EYESVG; $("eyeM").onclick=()=>{SHOWM=!SHOWM;renderBank();};
@@ -457,7 +493,7 @@ $("bkBtn").onclick=async()=>{
   const msg=$("bkMsg"); msg.hidden=true; msg.style.color="";
   const strip=o=>{const c={...o};return c;};
   const data={app:"TAREK",version:1,exported:new Date().toISOString(),
-    bank:S.bank.map(strip)};
+    bank:S.bank.map(strip), expenses:EXP.map(strip)};
   const d=new Date(), name=`TAREK-backup-${d.getFullYear()}-${pad(d.getMonth()+1)}-${pad(d.getDate())}.json`;
   try{
     const url=URL.createObjectURL(new Blob([JSON.stringify(data,null,2)],{type:"application/json"}));
@@ -486,6 +522,7 @@ $("impGo").onclick=async()=>{
   if(!IMP) return; const j=IMP, msg=$("bkMsg"), go=$("impGo"); go.disabled=true; go.textContent="Importing…";
   const items=[]; const clean=o=>{const c={...o};delete c.id;return c;};
   j.bank.forEach(r=>items.push(["bank/"+r.id,clean(r)]));
+  (j.expenses||[]).forEach(r=>items.push(["expenses/"+r.id,clean(r)]));
   try{ await db.batchSet(items); msg.textContent=`Imported ${items.length} items.`; msg.style.color="var(--ok)"; $("impBox").hidden=true; IMP=null; }
   catch(x){ msg.textContent="Import didn't finish. Try again."; msg.style.color="var(--bad)"; }
   msg.hidden=false; go.disabled=false; go.textContent="Confirm import";
@@ -522,7 +559,7 @@ function renderBank(){
     if(!b.classList.contains("arm")){b.classList.add("arm");b.textContent="Sure?";setTimeout(()=>{b.classList.remove("arm");b.textContent="Delete"},3000);return;}
     delBank(b.dataset.id);
   });
-  drawAll(); drawHero();
+  renderExp(); drawAll(); drawHero();
   $("bTotLbl").textContent="Total for "+wyName(y);
   YTOTAL=rows.reduce((s,r)=>s+(+r.amount||0),0); $("bTotal").textContent=SHOWT?fmt(rows.reduce((s,r)=>s+(+r.amount||0),0)):"••••••"; eyeSet("eyeT",SHOWT,"total"); drawStart();
   const base=["School","Academy","Private"], extra=[...new Set(rows.map(r=>r.source).filter(x=>x&&!base.includes(x)))];
@@ -530,11 +567,22 @@ function renderBank(){
   $("bSrc").querySelectorAll("span").forEach((el,i)=>{ const nm=base.concat(extra)[i]; el.textContent=""; const d=document.createElement("i"); d.className="dot "+(base.includes(nm)?nm:"other"); el.appendChild(d); el.appendChild(document.createTextNode(nm)); });
 }
 $("bView").onchange=renderBank;
-$("bSource").onchange=()=>{const n=$("bSource").value==="__new";$("bNewWrap").hidden=!n;if(n)setTimeout(()=>$("bNew").focus(),30);};
+$("bSource").onchange=()=>{const v=$("bSource").value, n=v==="__new", x=v==="__exp";$("bNewWrap").hidden=!n;$("bExpWrap").hidden=!x;if(n)setTimeout(()=>$("bNew").focus(),30);if(x)setTimeout(()=>$("bExpNote").focus(),30);};
 $("bankForm").addEventListener("submit",async e=>{
   e.preventDefault();
   const isNew=$("bSource").value==="__new", source=isNew?$("bNew").value.trim().replace(/\s+/g," "):$("bSource").value, amount=parseFloat($("bAmount").value);
   const err=$("bErr"); err.hidden=true;
+  if($("bSource").value==="__exp"){
+    const note=$("bExpNote").value.trim().replace(/\s+/g," ");
+    if(!note){err.textContent="Write what the money was spent on.";err.hidden=false;return;}
+    if(!(amount>0)){err.textContent="Enter the amount.";err.hidden=false;return;}
+    const r={month:+$("bMonth").value,year:+$("bYear").value,note,amount,at:Date.now()};
+    $("bAmount").value=""; $("bExpNote").value=""; $("bSource").value="School"; $("bExpWrap").hidden=true;
+    $("bView").value=wy(r);
+    if(db){try{await db.collection("expenses").add(r);}catch(x){$("bAmount").value=amount;$("bExpNote").value=note;err.textContent="Not saved. Try again.";err.hidden=false;}}
+    else{EXP.push({...r,id:"l"+r.at});}
+    renderBank(); return;
+  }
   if(isNew&&!source){err.textContent="Write the name of the income.";err.hidden=false;return;}
   if(!(amount>0)){err.textContent="Enter the amount.";err.hidden=false;return;}
   const r={month:+$("bMonth").value,year:+$("bYear").value,source,amount,at:Date.now()};
@@ -561,6 +609,7 @@ async function startData(){
     PIN=(d&&d.h&&d.salt)?{h:d.h,salt:d.salt}:null;
     if(!UNLOCKED) drawLock();
   },()=>fail("Lost connection to your saved data. Reload the page."));
+  db.collection("expenses").onSnapshot(snap=>{ EXP=snap.docs.map(d=>({id:d.id,...d.data()})); renderBank(); },()=>fail("Lost connection to your saved data. Reload the page."));
   db.collection("bank").onSnapshot(snap=>{
     S.bank=snap.docs.map(d=>({id:d.id,...d.data()})); renderBank();
   },()=>fail("Lost connection to your saved data. Reload the page."));
