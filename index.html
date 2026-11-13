@@ -437,13 +437,13 @@ var SHOWALL=false, SHOWT=false, SHOWS=false, SHOWSRC=false, STARTS={}; let EXPOP
 function eyeSet(id,on,what){ $(id).setAttribute("aria-pressed",on); $(id).setAttribute("aria-label",(on?"Hide ":"Show ")+what); }
 function renderExp(){
   const y=+$("bView").value, mk=r=>r.year*12+r.month;
-  const ewy=r=>r.wy!=null?+r.wy:wy(r);
-  const rows=EXP.filter(r=>ewy(r)===y).sort((a,b)=>(b.at||0)-(a.at||0));
+  const ewy=r=>r.wy!=null?+r.wy:wy(r), ek=r=>r.year!=null&&r.month!=null?r.year*12+r.month:-1;
+  const rows=EXP.filter(r=>ewy(r)===y).sort((a,b)=>ek(b)-ek(a)||(b.at||0)-(a.at||0));
   ETOTAL=rows.reduce((a,r)=>a+(+r.amount||0),0);
   $("expLbl").textContent="Expenses "+wyName(y);
   const list=$("expList");
-  if(!rows.length) list.innerHTML=`<p class="empty" style="padding:8px 0">No expenses for ${wyName(y)}. Choose Expense in Source to add one. It goes into the work year shown above.</p>`;
-  else list.innerHTML=rows.map(r=>`<div class="item ex"><div class="s"><span class="dot exp"></span><span class="en"></span></div><span class="amt neg">${SHOWEXP?"−"+fmt(r.amount):"••••"}</span><button class="x" type="button" data-eid="${r.id}">Delete</button></div>`).join("");
+  if(!rows.length) list.innerHTML=`<p class="empty" style="padding:8px 0">No expenses for ${wyName(y)}. Choose Expense in Source to add one. </p>`;
+  else list.innerHTML=rows.map(r=>`<div class="item ex"><div class="s"><span class="dot exp"></span><span class="en"></span>${r.month!=null&&r.year!=null?`<small>${MONTHS[r.month].slice(0,3)} ${r.year}</small>`:""}</div><span class="amt neg">${SHOWEXP?"−"+fmt(r.amount):"••••"}</span><button class="x" type="button" data-eid="${r.id}">Delete</button></div>`).join("");
   list.querySelectorAll(".item.ex").forEach((el,i)=>el.querySelector(".en").textContent=rows[i].note||"Expense");
   list.querySelectorAll("[data-eid]").forEach(b=>b.onclick=()=>{
     if(!b.classList.contains("arm")){b.classList.add("arm");b.textContent="Sure?";setTimeout(()=>{b.classList.remove("arm");b.textContent="Delete"},3000);return;}
@@ -576,7 +576,7 @@ function renderBank(){
   $("bSrc").querySelectorAll("span").forEach((el,i)=>{ const nm=base.concat(extra)[i]; el.textContent=""; const d=document.createElement("i"); d.className="dot "+(base.includes(nm)?nm:"other"); el.appendChild(d); el.appendChild(document.createTextNode(nm)); });
 }
 $("bView").onchange=renderBank;
-$("bSource").onchange=()=>{const v=$("bSource").value, n=v==="__new", x=v==="__exp";$("bNewWrap").hidden=!n;$("bExpWrap").hidden=!x;$("bMonthWrap").hidden=x;$("bYearWrap").hidden=x;if(n)setTimeout(()=>$("bNew").focus(),30);if(x)setTimeout(()=>$("bExpNote").focus(),30);};
+$("bSource").onchange=()=>{const v=$("bSource").value, n=v==="__new", x=v==="__exp";$("bNewWrap").hidden=!n;$("bExpWrap").hidden=!x;if(n)setTimeout(()=>$("bNew").focus(),30);if(x)setTimeout(()=>$("bExpNote").focus(),30);};
 $("bankForm").addEventListener("submit",async e=>{
   e.preventDefault();
   const isNew=$("bSource").value==="__new", source=isNew?$("bNew").value.trim().replace(/\s+/g," "):$("bSource").value, amount=parseFloat($("bAmount").value);
@@ -585,8 +585,8 @@ $("bankForm").addEventListener("submit",async e=>{
     const note=$("bExpNote").value.trim().replace(/\s+/g," ");
     if(!note){err.textContent="Write what the money was spent on.";err.hidden=false;return;}
     if(!(amount>0)){err.textContent="Enter the amount.";err.hidden=false;return;}
-    const r={wy:+$("bView").value,note,amount,at:Date.now()};
-    $("bAmount").value=""; $("bExpNote").value=""; $("bSource").value="School"; $("bExpWrap").hidden=true; $("bMonthWrap").hidden=false; $("bYearWrap").hidden=false;
+    const r={month:+$("bMonth").value,year:+$("bYear").value,note,amount,at:Date.now()};
+    $("bAmount").value=""; $("bExpNote").value=""; $("bSource").value="School"; $("bExpWrap").hidden=true; $("bView").value=wy(r);
     if(db){try{await db.collection("expenses").add(r);}catch(x){$("bAmount").value=amount;$("bExpNote").value=note;err.textContent="Not saved. Try again.";err.hidden=false;}}
     else{EXP.push({...r,id:"l"+r.at});}
     renderBank(); return;
